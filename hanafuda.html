@@ -93,134 +93,145 @@
   <a href="index.html" class="back-link">← 大会トップへ戻る</a>
 </main>
 
-<script>
-const STORAGE_KEY = "owari_hanafuda_tournament_data";
-let tournamentData = { players: [], matches: {}, selectedRound: "all" };
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-window.addEventListener("DOMContentLoaded", () => {
-  loadAndRender();
-  window.addEventListener("storage", loadAndRender);
-});
+  const firebaseConfig = {
+    apiKey: "AIzaSyBfHItaYSzAD-Y_xUTIU4WCjmTonf8XL7M",
+    authDomain: "owari-yugi.firebaseapp.com",
+    databaseURL: "https://owari-yugi-default-rtdb.firebaseio.com",
+    projectId: "owari-yugi",
+    storageBucket: "owari-yugi.firebasestorage.app",
+    messagingSenderId: "918175087434",
+    appId: "1:918175087434:web:d1069fe295626feaa81fb3"
+  };
 
-function loadAndRender() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  const container = document.getElementById("tournament-tree");
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const hanafudaRef = ref(db, "hanafuda");
 
-  if (!saved) {
-    container.innerHTML = `<div class="empty-msg">現在、トーナメント表は準備中です。</div>`;
-    return;
-  }
+  let tournamentData = { players: [], matches: {}, selectedRound: "all" };
 
-  tournamentData = JSON.parse(saved);
-  if (!tournamentData.selectedRound) tournamentData.selectedRound = "all";
-  renderTabs();
-  renderTree();
-}
+  onValue(hanafudaRef, (snapshot) => {
+    const data = snapshot.val();
+    const container = document.getElementById("tournament-tree");
 
-function getRoundName(r, totalRounds) {
-  const remaining = totalRounds - r;
-  if (remaining === 1) return "決勝戦";
-  if (remaining === 2) return "準決勝";
-  if (remaining === 3) return "準々決勝";
-  return `${r + 1}回戦`;
-}
-
-function renderTabs() {
-  const tabContainer = document.getElementById("tab-container");
-  if (!tournamentData.players || tournamentData.players.length === 0) return;
-
-  const totalRounds = Math.ceil(Math.log2(tournamentData.players.length));
-  let html = `<button class="tab-btn ${tournamentData.selectedRound === 'all' ? 'active' : ''}" onclick="selectRound('all')">全回戦表示</button>`;
-  
-  for (let r = 0; r < totalRounds; r++) {
-    const name = getRoundName(r, totalRounds);
-    const active = tournamentData.selectedRound === r ? 'active' : '';
-    html += `<button class="tab-btn ${active}" onclick="selectRound(${r})">${name}</button>`;
-  }
-  
-  tabContainer.innerHTML = html;
-}
-
-function selectRound(r) {
-  tournamentData.selectedRound = r;
-  renderTabs();
-  renderTree();
-}
-
-function renderTree() {
-  const treeContainer = document.getElementById("tournament-tree");
-  treeContainer.innerHTML = "";
-
-  const players = tournamentData.players;
-  if (!players || players.length === 0) {
-    treeContainer.innerHTML = `<div class="empty-msg">現在、トーナメント表は準備中です。</div>`;
-    return;
-  }
-
-  const totalRounds = Math.ceil(Math.log2(players.length));
-  
-  let roundSlots = [];
-  roundSlots[0] = [...players];
-
-  for (let r = 1; r < totalRounds; r++) {
-    const prevSlots = roundSlots[r - 1];
-    const nextCount = Math.ceil(prevSlots.length / 2);
-    const currentRoundSlots = [];
-
-    for (let m = 0; m < nextCount; m++) {
-      const matchKey = `${r - 1}-${m}`;
-      const matchInfo = tournamentData.matches[matchKey] || {};
-      currentRoundSlots.push(matchInfo.winner || "（未定）");
-    }
-    roundSlots[r] = currentRoundSlots;
-  }
-
-  for (let r = 0; r < totalRounds; r++) {
-    if (tournamentData.selectedRound !== "all" && tournamentData.selectedRound !== r) {
-      continue;
+    if (!data || !data.players || data.players.length === 0) {
+      container.innerHTML = `<div class="empty-msg">現在、トーナメント表は準備中です。</div>`;
+      document.getElementById("tab-container").innerHTML = "";
+      return;
     }
 
-    const roundBox = document.createElement("div");
-    roundBox.className = "round-box";
-    roundBox.innerHTML = `<div class="round-title">${getRoundName(r, totalRounds)}</div>`;
+    tournamentData.players = data.players || [];
+    tournamentData.matches = data.matches || {};
+    renderTabs();
+    renderTree();
+  });
 
-    const slots = roundSlots[r];
-    const matchCount = Math.ceil(slots.length / 2);
+  function getRoundName(r, totalRounds) {
+    const remaining = totalRounds - r;
+    if (remaining === 1) return "決勝戦";
+    if (remaining === 2) return "準決勝";
+    if (remaining === 3) return "準々決勝";
+    return `${r + 1}回戦`;
+  }
 
-    for (let m = 0; m < matchCount; m++) {
-      const p1 = slots[m * 2] || "（なし）";
-      const p2 = slots[m * 2 + 1] || "（なし）";
-      const matchKey = `${r}-${m}`;
-      const matchState = tournamentData.matches[matchKey] || { winner: null, host: null };
+  function renderTabs() {
+    const tabContainer = document.getElementById("tab-container");
+    if (!tournamentData.players || tournamentData.players.length === 0) return;
 
-      const matchCard = document.createElement("div");
-      matchCard.className = "match-card";
+    const totalRounds = Math.ceil(Math.log2(tournamentData.players.length));
+    let html = `<button class="tab-btn ${tournamentData.selectedRound === 'all' ? 'active' : ''}" data-round="all">全回戦表示</button>`;
+    
+    for (let r = 0; r < totalRounds; r++) {
+      const name = getRoundName(r, totalRounds);
+      const active = tournamentData.selectedRound === r ? 'active' : '';
+      html += `<button class="tab-btn ${active}" data-round="${r}">${name}</button>`;
+    }
+    
+    tabContainer.innerHTML = html;
 
-      let html = `<div class="match-num">第 ${m + 1} 試合</div>`;
+    tabContainer.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const val = e.target.getAttribute("data-round");
+        tournamentData.selectedRound = val === "all" ? "all" : parseInt(val);
+        renderTabs();
+        renderTree();
+      });
+    });
+  }
 
-      // プレイヤー1
-      const isP1Winner = (matchState.winner === p1 && p1 !== "（未定）" && p1 !== "（なし）");
-      html += `
-        <div class="player-slot ${isP1Winner ? 'winner' : ''}">
-          <span>${p1} ${matchState.host === p1 ? '<span class="host-badge">◎</span>' : ''}</span>
-        </div>
-      `;
+  function renderTree() {
+    const treeContainer = document.getElementById("tournament-tree");
+    treeContainer.innerHTML = "";
 
-      // プレイヤー2
-      const isP2Winner = (matchState.winner === p2 && p2 !== "（未定）" && p2 !== "（なし）");
-      html += `
-        <div class="player-slot ${isP2Winner ? 'winner' : ''}">
-          <span>${p2} ${matchState.host === p2 ? '<span class="host-badge">◎</span>' : ''}</span>
-        </div>
-      `;
+    const players = tournamentData.players;
+    if (!players || players.length === 0) return;
 
-      matchCard.innerHTML = html;
-      roundBox.appendChild(matchCard);
+    const totalRounds = Math.ceil(Math.log2(players.length));
+    
+    let roundSlots = [];
+    roundSlots[0] = [...players];
+
+    for (let r = 1; r < totalRounds; r++) {
+      const prevSlots = roundSlots[r - 1];
+      const nextCount = Math.ceil(prevSlots.length / 2);
+      const currentRoundSlots = [];
+
+      for (let m = 0; m < nextCount; m++) {
+        const matchKey = `${r - 1}-${m}`;
+        const matchInfo = tournamentData.matches[matchKey] || {};
+        currentRoundSlots.push(matchInfo.winner || "（未定）");
+      }
+      roundSlots[r] = currentRoundSlots;
     }
 
-    treeContainer.appendChild(roundBox);
+    for (let r = 0; r < totalRounds; r++) {
+      if (tournamentData.selectedRound !== "all" && tournamentData.selectedRound !== r) {
+        continue;
+      }
+
+      const roundBox = document.createElement("div");
+      roundBox.className = "round-box";
+      roundBox.innerHTML = `<div class="round-title">${getRoundName(r, totalRounds)}</div>`;
+
+      const slots = roundSlots[r];
+      const matchCount = Math.ceil(slots.length / 2);
+
+      for (let m = 0; m < matchCount; m++) {
+        const p1 = slots[m * 2] || "（なし）";
+        const p2 = slots[m * 2 + 1] || "（なし）";
+        const matchKey = `${r}-${m}`;
+        const matchState = tournamentData.matches[matchKey] || { winner: null, host: null };
+
+        const matchCard = document.createElement("div");
+        matchCard.className = "match-card";
+
+        let html = `<div class="match-num">第 ${m + 1} 試合</div>`;
+
+        const isP1Winner = (matchState.winner === p1 && p1 !== "（未定）" && p1 !== "（なし）");
+        html += `
+          <div class="player-slot ${isP1Winner ? 'winner' : ''}">
+            <span>${p1} ${matchState.host === p1 ? '<span class="host-badge">◎</span>' : ''}</span>
+          </div>
+        `;
+
+        const isP2Winner = (matchState.winner === p2 && p2 !== "（未定）" && p2 !== "（なし）");
+        html += `
+          <div class="player-slot ${isP2Winner ? 'winner' : ''}">
+            <span>${p2} ${matchState.host === p2 ? '<span class="host-badge">◎</span>' : ''}</span>
+          </div>
+        `;
+
+        matchCard.innerHTML = html;
+        roundBox.appendChild(matchCard);
+      }
+
+      treeContainer.appendChild(roundBox);
+    }
   }
-}
 </script>
 </body>
 </html>
