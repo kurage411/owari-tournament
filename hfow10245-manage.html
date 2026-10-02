@@ -19,22 +19,18 @@
       background-color: #f3ead5;
       background-image: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(80, 60, 40, 0.025) 4px);
     }
-    .container { width: min(1200px, 94%); margin: 0 auto; padding: 35px 0 60px; }
+    .container { width: min(1400px, 96%); margin: 0 auto; padding: 35px 0 60px; }
     header { text-align: center; margin-bottom: 35px; }
     .small-title { font-size: 13px; letter-spacing: 0.25em; color: #6d6255; margin-bottom: 10px; }
     h1 { margin: 0; font-size: clamp(28px, 6vw, 42px); font-weight: normal; letter-spacing: 0.15em; color: #263d52; }
     .line { width: 100px; height: 2px; margin: 18px auto; background: #a33a32; }
 
     .panel {
-      margin-bottom: 25px;
-      padding: 25px;
-      background: rgba(255, 252, 241, 0.85);
-      border: 1px solid #a99b83;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      margin-bottom: 25px; padding: 25px; background: rgba(255, 252, 241, 0.85);
+      border: 1px solid #a99b83; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
     .panel-title {
-      margin: 0 0 20px; padding-bottom: 10px;
-      border-bottom: 1px solid #b9ad99;
+      margin: 0 0 20px; padding-bottom: 10px; border-bottom: 1px solid #b9ad99;
       font-size: 20px; font-weight: normal; color: #263d52; letter-spacing: 0.12em;
     }
     .form-row { margin-bottom: 20px; }
@@ -57,7 +53,17 @@
     .danger-btn { background: #8d302b; }
     .danger-btn:hover { background: #a33a32; }
 
-    /* 回戦切り替えタブ */
+    /* 検索ボックス */
+    .search-box {
+      margin-bottom: 20px; display: flex; align-items: center; gap: 10px; background: #fffdf5;
+      padding: 10px 15px; border: 1px solid #a99b83;
+    }
+    .search-box label { margin: 0; white-space: nowrap; font-weight: bold; color: #263d52; }
+    .search-box input {
+      flex: 1; padding: 8px 12px; border: 1px solid #aaa08f; font-family: inherit; font-size: 14px; outline: none;
+    }
+
+    /* 回戦タブ */
     .view-tabs {
       display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #a99b83; padding-bottom: 10px;
       overflow-x: auto; -webkit-overflow-scrolling: touch;
@@ -68,27 +74,51 @@
     }
     .tab-btn.active { background: #263d52; color: #fffaf0; border-color: #263d52; }
 
-    /* トーナメント表示 */
-    .tournament-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    .round-box { background: rgba(255, 255, 255, 0.5); padding: 15px; border: 1px solid #c8bead; }
-    .round-title { font-size: 16px; color: #263d52; border-bottom: 2px solid #263d52; padding-bottom: 5px; margin-bottom: 15px; text-align: center; }
+    /* 全回戦用：横スクロール コの字ツリー */
+    .tree-scroll-wrapper { overflow-x: auto; padding: 20px 0; }
+    .tournament-tree-full { display: flex; align-items: stretch; min-width: max-content; }
+    .round-column-full { display: flex; flex-direction: column; justify-content: space-around; width: 220px; margin-right: 30px; position: relative; }
+    .round-header { text-align: center; font-size: 15px; color: #263d52; border-bottom: 2px solid #263d52; padding-bottom: 5px; margin-bottom: 15px; font-weight: bold; }
+    
+    .match-group { position: relative; margin: 15px 0; display: flex; flex-direction: column; justify-content: center; flex: 1; }
+    .match-group::after {
+      content: ""; position: absolute; right: -30px; top: 25%; height: 50%; width: 30px;
+      border-right: 2px solid #a99b83; border-top: 2px solid #a99b83; border-bottom: 2px solid #a99b83; z-index: 1; pointer-events: none;
+    }
+    .match-group::before {
+      content: ""; position: absolute; right: -45px; top: 50%; width: 15px; border-top: 2px solid #a99b83; z-index: 1; pointer-events: none;
+    }
+    .round-column-full:last-child .match-group::after,
+    .round-column-full:last-child .match-group::before { display: none; }
 
-    .match-card { background: #fffdf5; border: 1px solid #aaa08f; margin-bottom: 15px; padding: 10px; }
-    .match-num { font-size: 11px; color: #756b5f; margin-bottom: 5px; }
+    /* 単一回戦用：複数行折り返し（2〜3列グリッド） */
+    .single-round-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; padding: 10px 0;
+    }
 
+    .match-card {
+      background: #fffdf5; border: 1px solid #aaa08f; padding: 8px; position: relative; z-index: 2;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.05); transition: 0.2s;
+    }
+    /* 検索ヒット時のハイライト */
+    .match-card.search-match {
+      border: 2px solid #a33a32; background: #fff5f3; box-shadow: 0 0 10px rgba(163, 58, 50, 0.3);
+    }
+
+    .match-num { font-size: 11px; color: #756b5f; margin-bottom: 4px; text-align: center; }
     .player-slot {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 10px; margin: 4px 0; border: 1px solid #e3dac8; background: #fff;
-      cursor: pointer; user-select: none; transition: 0.2s;
+      padding: 6px 8px; margin: 2px 0; border: 1px solid #e3dac8; background: #fff;
+      cursor: pointer; user-select: none; transition: 0.2s; font-size: 13px;
     }
     .player-slot:hover { background: #fdfaf0; }
     .player-slot.winner { border-color: #a33a32; background: #fdf2f0; color: #a33a32; font-weight: bold; }
-    .player-slot.winner::after { content: "★ 勝利"; font-size: 11px; margin-left: 8px; color: #a33a32; }
+    .player-slot.winner::after { content: "★"; font-size: 12px; color: #a33a32; margin-left: 4px; }
     .player-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .host-btn {
-      font-size: 11px; padding: 2px 6px; border: 1px solid #aaa08f; background: #fdfaef;
-      cursor: pointer; margin-left: 8px; color: #5e554c; flex-shrink: 0;
+      font-size: 10px; padding: 2px 4px; border: 1px solid #aaa08f; background: #fdfaef;
+      cursor: pointer; margin-left: 6px; color: #5e554c; flex-shrink: 0;
     }
     .host-btn.active { background: #263d52; color: #fff; border-color: #263d52; }
 
@@ -122,14 +152,17 @@
 
   <section class="panel" id="manage-area" style="display:none;">
     <h2 class="panel-title">対戦結果の入力・部屋主設定</h2>
-    <div class="notice" style="margin-bottom: 20px;">
-      💡 枠をタップして勝利状態のオン/オフを切り替えます。全操作は他端末とリアルタイム同期されます。
+    
+    <!-- 検索機能 -->
+    <div class="search-box">
+      <label for="search-input">🔍 選手検索:</label>
+      <input type="text" id="search-input" placeholder="名前を入力すると対戦枠を強調表示します...">
     </div>
 
-    <!-- 回戦タブコンテナ -->
+    <!-- 回戦タブ -->
     <div class="view-tabs" id="tab-container"></div>
 
-    <div id="tournament-tree" class="tournament-grid"></div>
+    <div id="tree-wrapper"></div>
   </section>
 
   <a href="admin-panow10el245.html" class="back-link">← 管理トップへ戻る</a>
@@ -154,13 +187,8 @@
   const db = getDatabase(app);
   const hanafudaRef = ref(db, "hanafuda");
 
-  let tournamentData = {
-    players: [],
-    matches: {},
-    selectedRound: "all"
-  };
+  let tournamentData = { players: [], matches: {}, selectedRound: "all", searchQuery: "" };
 
-  // Firebaseからのリアルタイムデータ監視
   onValue(hanafudaRef, (snapshot) => {
     const data = snapshot.val();
     if (data && data.players && data.players.length > 0) {
@@ -171,7 +199,7 @@
       renderTabs();
       renderTree();
     } else {
-      tournamentData = { players: [], matches: {}, selectedRound: "all" };
+      tournamentData = { players: [], matches: {}, selectedRound: "all", searchQuery: "" };
       document.getElementById("manage-area").style.display = "none";
     }
   });
@@ -183,10 +211,14 @@
     });
   }
 
+  document.getElementById("search-input").addEventListener("input", (e) => {
+    tournamentData.searchQuery = e.target.value.trim().toLowerCase();
+    renderTree();
+  });
+
   document.getElementById("btn-generate").addEventListener("click", () => {
     const rawText = document.getElementById("player-list").value.trim();
     if (!rawText) return alert("参加者の並びを入力してください。");
-
     const list = rawText.split("\n").map(s => s.trim()).filter(s => s !== "");
     if (list.length < 2) return alert("最低2名以上のリストを入力してください。");
 
@@ -240,14 +272,13 @@
   }
 
   function renderTree() {
-    const treeContainer = document.getElementById("tournament-tree");
-    treeContainer.innerHTML = "";
+    const wrapper = document.getElementById("tree-wrapper");
+    wrapper.innerHTML = "";
 
     const players = tournamentData.players;
     if (!players || players.length === 0) return;
 
     const totalRounds = Math.ceil(Math.log2(players.length));
-    
     let roundSlots = [];
     roundSlots[0] = [...players];
 
@@ -264,14 +295,83 @@
       roundSlots[r] = currentRoundSlots;
     }
 
-    for (let r = 0; r < totalRounds; r++) {
-      if (tournamentData.selectedRound !== "all" && tournamentData.selectedRound !== r) {
-        continue;
-      }
+    const query = tournamentData.searchQuery;
 
-      const roundBox = document.createElement("div");
-      roundBox.className = "round-box";
-      roundBox.innerHTML = `<div class="round-title">${getRoundName(r, totalRounds)}</div>`;
+    // A. 全回戦表示（コの字ツリー・横スクロール）
+    if (tournamentData.selectedRound === "all") {
+      const scrollWrapper = document.createElement("div");
+      scrollWrapper.className = "tree-scroll-wrapper";
+
+      const treeContainer = document.createElement("div");
+      treeContainer.className = "tournament-tree-full";
+
+      for (let r = 0; r < totalRounds; r++) {
+        const col = document.createElement("div");
+        col.className = "round-column-full";
+        col.innerHTML = `<div class="round-header">${getRoundName(r, totalRounds)}</div>`;
+
+        const slots = roundSlots[r];
+        const matchCount = Math.ceil(slots.length / 2);
+
+        for (let m = 0; m < matchCount; m++) {
+          const p1 = slots[m * 2] || "（なし）";
+          const p2 = slots[m * 2 + 1] || "（なし）";
+          const matchKey = `${r}-${m}`;
+          const matchState = tournamentData.matches[matchKey] || { winner: null, host: null };
+
+          const isMatchSearch = query && (p1.toLowerCase().includes(query) || p2.toLowerCase().includes(query));
+
+          const matchGroup = document.createElement("div");
+          matchGroup.className = "match-group";
+
+          const matchCard = document.createElement("div");
+          matchCard.className = `match-card ${isMatchSearch ? 'search-match' : ''}`;
+
+          let html = `<div class="match-num">第 ${m + 1} 試合</div>`;
+          const isP1Winner = (matchState.winner === p1 && p1 !== "（未定）" && p1 !== "（なし）");
+          html += `
+            <div class="player-slot ${isP1Winner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p1}">
+              <span class="player-name">${p1}</span>
+              ${(p1 !== "（未定）" && p1 !== "（なし）" && p2 !== "（なし）") ? `
+                <button class="host-btn ${matchState.host === p1 ? 'active' : ''}" data-host-key="${matchKey}" data-host-player="${p1}">
+                  ${matchState.host === p1 ? '◎ 部屋主' : '部屋主'}
+                </button>
+              ` : ''}
+            </div>
+          `;
+
+          const isP2Winner = (matchState.winner === p2 && p2 !== "（未定）" && p2 !== "（なし）");
+          html += `
+            <div class="player-slot ${isP2Winner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p2}">
+              <span class="player-name">${p2}</span>
+              ${(p2 !== "（未定）" && p2 !== "（なし）" && p1 !== "（なし）") ? `
+                <button class="host-btn ${matchState.host === p2 ? 'active' : ''}" data-host-key="${matchKey}" data-host-player="${p2}">
+                  ${matchState.host === p2 ? '◎ 部屋主' : '部屋主'}
+                </button>
+              ` : ''}
+            </div>
+          `;
+
+          matchCard.innerHTML = html;
+          matchGroup.appendChild(matchCard);
+          col.appendChild(matchGroup);
+        }
+        treeContainer.appendChild(col);
+      }
+      scrollWrapper.appendChild(treeContainer);
+      wrapper.appendChild(scrollWrapper);
+
+    } else {
+      // B. 単一回戦表示（複数行・2〜3列折り返しグリッド）
+      const r = tournamentData.selectedRound;
+      const header = document.createElement("div");
+      header.className = "round-header";
+      header.style.marginBottom = "20px";
+      header.textContent = getRoundName(r, totalRounds);
+      wrapper.appendChild(header);
+
+      const gridContainer = document.createElement("div");
+      gridContainer.className = "single-round-grid";
 
       const slots = roundSlots[r];
       const matchCount = Math.ceil(slots.length / 2);
@@ -282,11 +382,12 @@
         const matchKey = `${r}-${m}`;
         const matchState = tournamentData.matches[matchKey] || { winner: null, host: null };
 
+        const isMatchSearch = query && (p1.toLowerCase().includes(query) || p2.toLowerCase().includes(query));
+
         const matchCard = document.createElement("div");
-        matchCard.className = "match-card";
+        matchCard.className = `match-card ${isMatchSearch ? 'search-match' : ''}`;
 
         let html = `<div class="match-num">第 ${m + 1} 試合</div>`;
-
         const isP1Winner = (matchState.winner === p1 && p1 !== "（未定）" && p1 !== "（なし）");
         html += `
           <div class="player-slot ${isP1Winner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p1}">
@@ -312,14 +413,13 @@
         `;
 
         matchCard.innerHTML = html;
-        roundBox.appendChild(matchCard);
+        gridContainer.appendChild(matchCard);
       }
-
-      treeContainer.appendChild(roundBox);
+      wrapper.appendChild(gridContainer);
     }
 
-    // 勝者切り替えイベント
-    treeContainer.querySelectorAll(".player-slot").forEach(slot => {
+    // 勝者選択イベント
+    wrapper.querySelectorAll(".player-slot").forEach(slot => {
       slot.addEventListener("click", (e) => {
         if (e.target.tagName === 'BUTTON') return;
         const key = slot.getAttribute("data-key");
@@ -337,8 +437,8 @@
       });
     });
 
-    // 部屋主切り替えイベント
-    treeContainer.querySelectorAll(".host-btn").forEach(btn => {
+    // 部屋主選択イベント
+    wrapper.querySelectorAll(".host-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const key = btn.getAttribute("data-host-key");
