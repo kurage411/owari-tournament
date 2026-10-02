@@ -76,8 +76,8 @@
     .tournament-tree-full { display: flex; align-items: stretch; min-width: max-content; }
     .round-column-full { display: flex; flex-direction: column; justify-content: space-around; width: 220px; margin-right: 30px; position: relative; }
     .round-header { text-align: center; font-size: 15px; color: #263d52; border-bottom: 2px solid #263d52; padding-bottom: 5px; margin-bottom: 15px; font-weight: bold; }
-    
-    /* 通常の対戦グループ（コの字のトーナメント線） */
+
+    /* 通常ラウンドのコの字線 */
     .match-group { position: relative; margin: 15px 0; display: flex; flex-direction: column; justify-content: center; flex: 1; }
     .match-group::after {
       content: ""; position: absolute; right: -30px; top: 25%; height: 50%; width: 30px;
@@ -86,18 +86,25 @@
     .match-group::before {
       content: ""; position: absolute; right: -45px; top: 50%; width: 15px; border-top: 2px solid #a99b83; z-index: 1; pointer-events: none;
     }
-    .round-column-full:last-child .match-group::after,
-    .round-column-full:last-child .match-group::before { display: none; }
 
-    /* 決勝＆３位決定戦のコンテナ位置調整 */
-    .final-column-container {
-      display: flex; flex-direction: column; justify-content: center; height: 100%; gap: 30px;
+    /* 準決勝列専用：2つの試合を結ぶ1つの大きな「コの字」 */
+    .semi-final-column { position: relative; }
+    .semi-final-column::after {
+      content: ""; position: absolute; right: -30px; top: 25%; height: 50%; width: 30px;
+      border-right: 2px solid #a99b83; border-top: 2px solid #a99b83; border-bottom: 2px solid #a99b83; z-index: 1; pointer-events: none;
     }
-    .final-match-wrapper {
-      display: flex; flex-direction: column; justify-content: center; flex: 1;
+    .semi-final-column::before {
+      content: ""; position: absolute; right: -45px; top: 50%; width: 15px; border-top: 2px solid #a99b83; z-index: 1; pointer-events: none;
     }
-    .third-place-wrapper {
-      padding-top: 15px; border-top: 1px dashed #a99b83; margin-top: 10px;
+    .semi-final-column .match-group::after,
+    .semi-final-column .match-group::before { display: none; }
+
+    /* 決勝列：中央揃えで決勝戦と３位決定戦を並べる */
+    .final-column-full {
+      display: flex; flex-direction: column; justify-content: center; width: 220px; position: relative;
+    }
+    .final-box-group {
+      display: flex; flex-direction: column; gap: 20px; width: 100%;
     }
 
     .single-round-grid {
@@ -106,7 +113,7 @@
 
     .match-card {
       background: #fffdf5; border: 1px solid #aaa08f; padding: 8px; position: relative; z-index: 2;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.05); transition: 0.2s; margin-bottom: 10px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.05); transition: 0.2s;
     }
     .match-card.search-match {
       border: 2px solid #a33a32; background: #fff5f3; box-shadow: 0 0 10px rgba(163, 58, 50, 0.3);
@@ -369,33 +376,32 @@
       treeContainer.className = "tournament-tree-full";
 
       for (let r = 0; r < totalRounds; r++) {
-        const col = document.createElement("div");
-        col.className = "round-column-full";
-        col.innerHTML = `<div class="round-header">${getRoundName(r, totalRounds)}</div>`;
+        const isSemiFinal = (r === totalRounds - 2);
+        const isFinal = (r === totalRounds - 1);
 
-        if (r === totalRounds - 1) {
-          const finalContainer = document.createElement("div");
-          finalContainer.className = "final-column-container";
-
+        if (isFinal) {
+          const col = document.createElement("div");
+          col.className = "final-column-full";
+          
+          let html = `<div class="round-header" style="position:absolute; top:0; left:0; right:0;">決勝戦</div>`;
+          html += `<div class="final-box-group">`;
+          
           const p1 = roundSlots[r][0] || "（なし）";
           const p2 = roundSlots[r][1] || "（なし）";
-          const matchKey = `${r}-0`;
-
-          const finalMatchWrapper = document.createElement("div");
-          finalMatchWrapper.className = "final-match-wrapper";
-          finalMatchWrapper.innerHTML = createMatchCardHTML(p1, p2, matchKey, "決勝戦", query);
-          finalContainer.appendChild(finalMatchWrapper);
+          html += createMatchCardHTML(p1, p2, `${r}-0`, "決勝戦", query);
 
           if (totalRounds >= 2) {
             const [p3_1, p3_2] = get3rdPlacePlayers(roundSlots, totalRounds);
-            const thirdWrapper = document.createElement("div");
-            thirdWrapper.className = "third-place-wrapper";
-            thirdWrapper.innerHTML = createMatchCardHTML(p3_1, p3_2, "3rd-place", "３位決定戦", query);
-            finalContainer.appendChild(thirdWrapper);
+            html += createMatchCardHTML(p3_1, p3_2, "3rd-place", "３位決定戦", query);
           }
-
-          col.appendChild(finalContainer);
+          html += `</div>`;
+          col.innerHTML = html;
+          treeContainer.appendChild(col);
         } else {
+          const col = document.createElement("div");
+          col.className = `round-column-full ${isSemiFinal ? 'semi-final-column' : ''}`;
+          col.innerHTML = `<div class="round-header">${getRoundName(r, totalRounds)}</div>`;
+
           const slots = roundSlots[r];
           const matchCount = Math.ceil(slots.length / 2);
 
@@ -409,9 +415,8 @@
             matchGroup.innerHTML = createMatchCardHTML(p1, p2, matchKey, `第 ${m + 1} 試合`, query);
             col.appendChild(matchGroup);
           }
+          treeContainer.appendChild(col);
         }
-
-        treeContainer.appendChild(col);
       }
       scrollWrapper.appendChild(treeContainer);
       wrapper.appendChild(scrollWrapper);
