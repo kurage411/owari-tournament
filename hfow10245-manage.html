@@ -115,15 +115,15 @@
       </div>
     </div>
     <div class="button-area">
-      <button onclick="generateTournament()">入力内容でトーナメント表を作成</button>
-      <button class="danger-btn" onclick="clearTournament()">全データをリセット</button>
+      <button id="btn-generate">入力内容でトーナメント表を作成</button>
+      <button class="danger-btn" id="btn-clear">全データをリセット</button>
     </div>
   </section>
 
   <section class="panel" id="manage-area" style="display:none;">
     <h2 class="panel-title">対戦結果の入力・部屋主設定</h2>
     <div class="notice" style="margin-bottom: 20px;">
-      💡 枠をタップして勝利状態のオン/オフを切り替えます。
+      💡 枠をタップして勝利状態のオン/オフを切り替えます。全操作は他端末とリアルタイム同期されます。
     </div>
 
     <!-- 回戦タブコンテナ -->
@@ -135,196 +135,226 @@
   <a href="admin-panow10el245.html" class="back-link">← 管理トップへ戻る</a>
 </main>
 
-<script>
-const STORAGE_KEY = "owari_hanafuda_tournament_data";
-let tournamentData = {
-  players: [],
-  matches: {},
-  selectedRound: "all" // 'all' または ラウンドインデックス(0, 1, 2...)
-};
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-window.addEventListener("DOMContentLoaded", () => {
-  loadData();
-});
+  const firebaseConfig = {
+    apiKey: "AIzaSyBfHItaYSzAD-Y_xUTIU4WCjmTonf8XL7M",
+    authDomain: "owari-yugi.firebaseapp.com",
+    databaseURL: "https://owari-yugi-default-rtdb.firebaseio.com",
+    projectId: "owari-yugi",
+    storageBucket: "owari-yugi.firebasestorage.app",
+    messagingSenderId: "918175087434",
+    appId: "1:918175087434:web:d1069fe295626feaa81fb3"
+  };
 
-function loadData() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    tournamentData = JSON.parse(saved);
-    if (tournamentData.players && tournamentData.players.length > 0) {
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const hanafudaRef = ref(db, "hanafuda");
+
+  let tournamentData = {
+    players: [],
+    matches: {},
+    selectedRound: "all"
+  };
+
+  // Firebaseからのリアルタイムデータ監視
+  onValue(hanafudaRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data && data.players && data.players.length > 0) {
+      tournamentData.players = data.players || [];
+      tournamentData.matches = data.matches || {};
       document.getElementById("player-list").value = tournamentData.players.join("\n");
       document.getElementById("manage-area").style.display = "block";
       renderTabs();
       renderTree();
+    } else {
+      tournamentData = { players: [], matches: {}, selectedRound: "all" };
+      document.getElementById("manage-area").style.display = "none";
     }
+  });
+
+  function saveData() {
+    set(hanafudaRef, {
+      players: tournamentData.players,
+      matches: tournamentData.matches || {}
+    });
   }
-}
 
-function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tournamentData));
-}
+  document.getElementById("btn-generate").addEventListener("click", () => {
+    const rawText = document.getElementById("player-list").value.trim();
+    if (!rawText) return alert("参加者の並びを入力してください。");
 
-function generateTournament() {
-  const rawText = document.getElementById("player-list").value.trim();
-  if (!rawText) return alert("参加者の並びを入力してください。");
+    const list = rawText.split("\n").map(s => s.trim()).filter(s => s !== "");
+    if (list.length < 2) return alert("最低2名以上のリストを入力してください。");
 
-  const list = rawText.split("\n").map(s => s.trim()).filter(s => s !== "");
-  if (list.length < 2) return alert("最低2名以上のリストを入力してください。");
-
-  if (confirm("対戦結果をリセットして再生成しますか？")) {
-    tournamentData.players = list;
-    tournamentData.matches = {};
-    tournamentData.selectedRound = "all";
-    saveData();
-    document.getElementById("manage-area").style.display = "block";
-    renderTabs();
-    renderTree();
-  }
-}
-
-function clearTournament() {
-  if (confirm("全データを消去しますか？")) {
-    localStorage.removeItem(STORAGE_KEY);
-    tournamentData = { players: [], matches: {}, selectedRound: "all" };
-    document.getElementById("player-list").value = "";
-    document.getElementById("manage-area").style.display = "none";
-  }
-}
-
-function getRoundName(r, totalRounds) {
-  const remaining = totalRounds - r;
-  if (remaining === 1) return "決勝戦";
-  if (remaining === 2) return "準決勝";
-  if (remaining === 3) return "準々決勝";
-  return `${r + 1}回戦`;
-}
-
-function renderTabs() {
-  const tabContainer = document.getElementById("tab-container");
-  const totalRounds = Math.ceil(Math.log2(tournamentData.players.length));
-  
-  let html = `<button class="tab-btn ${tournamentData.selectedRound === 'all' ? 'active' : ''}" onclick="selectRound('all')">全回戦表示</button>`;
-  
-  for (let r = 0; r < totalRounds; r++) {
-    const name = getRoundName(r, totalRounds);
-    const active = tournamentData.selectedRound === r ? 'active' : '';
-    html += `<button class="tab-btn ${active}" onclick="selectRound(${r})">${name}</button>`;
-  }
-  
-  tabContainer.innerHTML = html;
-}
-
-function selectRound(r) {
-  tournamentData.selectedRound = r;
-  renderTabs();
-  renderTree();
-}
-
-function renderTree() {
-  const treeContainer = document.getElementById("tournament-tree");
-  treeContainer.innerHTML = "";
-
-  const players = tournamentData.players;
-  const totalRounds = Math.ceil(Math.log2(players.length));
-  
-  let roundSlots = [];
-  roundSlots[0] = [...players];
-
-  for (let r = 1; r < totalRounds; r++) {
-    const prevSlots = roundSlots[r - 1];
-    const nextCount = Math.ceil(prevSlots.length / 2);
-    const currentRoundSlots = [];
-
-    for (let m = 0; m < nextCount; m++) {
-      const matchKey = `${r - 1}-${m}`;
-      const matchInfo = tournamentData.matches[matchKey] || {};
-      currentRoundSlots.push(matchInfo.winner || "（未定）");
+    if (confirm("対戦結果をリセットして再生成しますか？")) {
+      tournamentData.players = list;
+      tournamentData.matches = {};
+      tournamentData.selectedRound = "all";
+      saveData();
     }
-    roundSlots[r] = currentRoundSlots;
+  });
+
+  document.getElementById("btn-clear").addEventListener("click", () => {
+    if (confirm("クラウド上の全データを消去しますか？")) {
+      remove(hanafudaRef);
+      document.getElementById("player-list").value = "";
+      document.getElementById("manage-area").style.display = "none";
+    }
+  });
+
+  function getRoundName(r, totalRounds) {
+    const remaining = totalRounds - r;
+    if (remaining === 1) return "決勝戦";
+    if (remaining === 2) return "準決勝";
+    if (remaining === 3) return "準々決勝";
+    return `${r + 1}回戦`;
   }
 
-  for (let r = 0; r < totalRounds; r++) {
-    // タブ選択による絞り込み
-    if (tournamentData.selectedRound !== "all" && tournamentData.selectedRound !== r) {
-      continue;
+  function renderTabs() {
+    const tabContainer = document.getElementById("tab-container");
+    if (!tournamentData.players || tournamentData.players.length === 0) return;
+
+    const totalRounds = Math.ceil(Math.log2(tournamentData.players.length));
+    let html = `<button class="tab-btn ${tournamentData.selectedRound === 'all' ? 'active' : ''}" data-round="all">全回戦表示</button>`;
+    
+    for (let r = 0; r < totalRounds; r++) {
+      const name = getRoundName(r, totalRounds);
+      const active = tournamentData.selectedRound === r ? 'active' : '';
+      html += `<button class="tab-btn ${active}" data-round="${r}">${name}</button>`;
     }
+    
+    tabContainer.innerHTML = html;
 
-    const roundBox = document.createElement("div");
-    roundBox.className = "round-box";
-    roundBox.innerHTML = `<div class="round-title">${getRoundName(r, totalRounds)}</div>`;
+    tabContainer.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const val = e.target.getAttribute("data-round");
+        tournamentData.selectedRound = val === "all" ? "all" : parseInt(val);
+        renderTabs();
+        renderTree();
+      });
+    });
+  }
 
-    const slots = roundSlots[r];
-    const matchCount = Math.ceil(slots.length / 2);
+  function renderTree() {
+    const treeContainer = document.getElementById("tournament-tree");
+    treeContainer.innerHTML = "";
 
-    for (let m = 0; m < matchCount; m++) {
-      const p1 = slots[m * 2] || "（なし）";
-      const p2 = slots[m * 2 + 1] || "（なし）";
-      const matchKey = `${r}-${m}`;
-      const matchState = tournamentData.matches[matchKey] || { winner: null, host: null };
+    const players = tournamentData.players;
+    if (!players || players.length === 0) return;
 
-      const matchCard = document.createElement("div");
-      matchCard.className = "match-card";
+    const totalRounds = Math.ceil(Math.log2(players.length));
+    
+    let roundSlots = [];
+    roundSlots[0] = [...players];
 
-      let html = `<div class="match-num">第 ${m + 1} 試合</div>`;
+    for (let r = 1; r < totalRounds; r++) {
+      const prevSlots = roundSlots[r - 1];
+      const nextCount = Math.ceil(prevSlots.length / 2);
+      const currentRoundSlots = [];
 
-      // プレイヤー1
-      const isP1Winner = (matchState.winner === p1 && p1 !== "（未定）" && p1 !== "（なし）");
-      html += `
-        <div class="player-slot ${isP1Winner ? 'winner' : ''}" onclick="toggleWinner('${matchKey}', '${p1}')">
-          <span class="player-name">${p1}</span>
-          ${(p1 !== "（未定）" && p1 !== "（なし）" && p2 !== "（なし）") ? `
-            <button class="host-btn ${matchState.host === p1 ? 'active' : ''}" onclick="event.stopPropagation(); setHost('${matchKey}', '${p1}')">
-              ${matchState.host === p1 ? '◎ 部屋主' : '部屋主'}
-            </button>
-          ` : ''}
-        </div>
-      `;
-
-      // プレイヤー2
-      const isP2Winner = (matchState.winner === p2 && p2 !== "（未定）" && p2 !== "（なし）");
-      html += `
-        <div class="player-slot ${isP2Winner ? 'winner' : ''}" onclick="toggleWinner('${matchKey}', '${p2}')">
-          <span class="player-name">${p2}</span>
-          ${(p2 !== "（未定）" && p2 !== "（なし）" && p1 !== "（なし）") ? `
-            <button class="host-btn ${matchState.host === p2 ? 'active' : ''}" onclick="event.stopPropagation(); setHost('${matchKey}', '${p2}')">
-              ${matchState.host === p2 ? '◎ 部屋主' : '部屋主'}
-            </button>
-          ` : ''}
-        </div>
-      `;
-
-      matchCard.innerHTML = html;
-      roundBox.appendChild(matchCard);
+      for (let m = 0; m < nextCount; m++) {
+        const matchKey = `${r - 1}-${m}`;
+        const matchInfo = tournamentData.matches[matchKey] || {};
+        currentRoundSlots.push(matchInfo.winner || "（未定）");
+      }
+      roundSlots[r] = currentRoundSlots;
     }
 
-    treeContainer.appendChild(roundBox);
+    for (let r = 0; r < totalRounds; r++) {
+      if (tournamentData.selectedRound !== "all" && tournamentData.selectedRound !== r) {
+        continue;
+      }
+
+      const roundBox = document.createElement("div");
+      roundBox.className = "round-box";
+      roundBox.innerHTML = `<div class="round-title">${getRoundName(r, totalRounds)}</div>`;
+
+      const slots = roundSlots[r];
+      const matchCount = Math.ceil(slots.length / 2);
+
+      for (let m = 0; m < matchCount; m++) {
+        const p1 = slots[m * 2] || "（なし）";
+        const p2 = slots[m * 2 + 1] || "（なし）";
+        const matchKey = `${r}-${m}`;
+        const matchState = tournamentData.matches[matchKey] || { winner: null, host: null };
+
+        const matchCard = document.createElement("div");
+        matchCard.className = "match-card";
+
+        let html = `<div class="match-num">第 ${m + 1} 試合</div>`;
+
+        const isP1Winner = (matchState.winner === p1 && p1 !== "（未定）" && p1 !== "（なし）");
+        html += `
+          <div class="player-slot ${isP1Winner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p1}">
+            <span class="player-name">${p1}</span>
+            ${(p1 !== "（未定）" && p1 !== "（なし）" && p2 !== "（なし）") ? `
+              <button class="host-btn ${matchState.host === p1 ? 'active' : ''}" data-host-key="${matchKey}" data-host-player="${p1}">
+                ${matchState.host === p1 ? '◎ 部屋主' : '部屋主'}
+              </button>
+            ` : ''}
+          </div>
+        `;
+
+        const isP2Winner = (matchState.winner === p2 && p2 !== "（未定）" && p2 !== "（なし）");
+        html += `
+          <div class="player-slot ${isP2Winner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p2}">
+            <span class="player-name">${p2}</span>
+            ${(p2 !== "（未定）" && p2 !== "（なし）" && p1 !== "（なし）") ? `
+              <button class="host-btn ${matchState.host === p2 ? 'active' : ''}" data-host-key="${matchKey}" data-host-player="${p2}">
+                ${matchState.host === p2 ? '◎ 部屋主' : '部屋主'}
+              </button>
+            ` : ''}
+          </div>
+        `;
+
+        matchCard.innerHTML = html;
+        roundBox.appendChild(matchCard);
+      }
+
+      treeContainer.appendChild(roundBox);
+    }
+
+    // 勝者切り替えイベント
+    treeContainer.querySelectorAll(".player-slot").forEach(slot => {
+      slot.addEventListener("click", (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        const key = slot.getAttribute("data-key");
+        const player = slot.getAttribute("data-player");
+        if (player === "（未定）" || player === "（なし）" || player.includes("シード") || player.includes("BYE")) return;
+
+        if (!tournamentData.matches[key]) tournamentData.matches[key] = { winner: null, host: null };
+
+        if (tournamentData.matches[key].winner === player) {
+          tournamentData.matches[key].winner = null;
+        } else {
+          tournamentData.matches[key].winner = player;
+        }
+        saveData();
+      });
+    });
+
+    // 部屋主切り替えイベント
+    treeContainer.querySelectorAll(".host-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const key = btn.getAttribute("data-host-key");
+        const player = btn.getAttribute("data-host-player");
+
+        if (!tournamentData.matches[key]) tournamentData.matches[key] = { winner: null, host: null };
+
+        if (tournamentData.matches[key].host === player) {
+          tournamentData.matches[key].host = null;
+        } else {
+          tournamentData.matches[key].host = player;
+        }
+        saveData();
+      });
+    });
   }
-}
-
-function toggleWinner(matchKey, player) {
-  if (player === "（未定）" || player === "（なし）" || player.includes("シード") || player.includes("BYE")) return;
-  if (!tournamentData.matches[matchKey]) tournamentData.matches[matchKey] = { winner: null, host: null };
-
-  if (tournamentData.matches[matchKey].winner === player) {
-    tournamentData.matches[matchKey].winner = null;
-  } else {
-    tournamentData.matches[matchKey].winner = player;
-  }
-  saveData();
-  renderTree();
-}
-
-function setHost(matchKey, player) {
-  if (!tournamentData.matches[matchKey]) tournamentData.matches[matchKey] = { winner: null, host: null };
-
-  if (tournamentData.matches[matchKey].host === player) {
-    tournamentData.matches[matchKey].host = null;
-  } else {
-    tournamentData.matches[matchKey].host = player;
-  }
-  saveData();
-  renderTree();
-}
 </script>
 </body>
 </html>
