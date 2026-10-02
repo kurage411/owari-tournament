@@ -296,6 +296,104 @@
         width: 100%;
       }
     }
+    /* 大会表 */
+
+#tournament-area {
+  display: none;
+}
+
+.bracket-info {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  background: rgba(38, 61, 82, 0.06);
+  border-left: 3px solid #263d52;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.bracket-round {
+  margin-bottom: 35px;
+}
+
+.bracket-round-title {
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #b9ad99;
+  color: #263d52;
+  font-size: 18px;
+}
+
+.match {
+  margin-bottom: 15px;
+  padding: 12px;
+  background: #fffdf5;
+  border: 1px solid #aaa08f;
+}
+
+.match-number {
+  margin-bottom: 8px;
+  color: #756b5f;
+  font-size: 12px;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 5px 0;
+  border-bottom: 1px solid #e3dac8;
+}
+
+.player-row:last-child {
+  border-bottom: none;
+}
+
+.player-name {
+  flex: 1;
+}
+
+.host-button {
+  width: auto;
+  padding: 5px 10px;
+  background: transparent;
+  color: #263d52;
+  border: 1px solid #aaa08f;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+.host-button.active {
+  background: #263d52;
+  color: #fffaf0;
+}
+
+.bye {
+  color: #9b8f80;
+  font-style: italic;
+}
+
+.advance-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px;
+  background: #a33a32;
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .match {
+    padding: 10px;
+  }
+
+  .player-row {
+    font-size: 14px;
+  }
+
+  .host-button {
+    padding: 5px 8px;
+  }
+}
   </style>
 </head>
 
@@ -482,7 +580,15 @@
       </div>
 
     </section>
+<section class="panel" id="tournament-area">
+  <h2 class="panel-title">
+    花札大会表
+  </h2>
 
+  <div class="bracket-info" id="bracket-info"></div>
+
+  <div id="bracket"></div>
+</section>
 
     <a
       href="index.html"
@@ -494,160 +600,764 @@
   </main>
 
 
-  <script>
+<script>
 
-    function createParticipants() {
-
-      const players =
-        Number(
-          document.getElementById("players").value
-        );
-
-      const seeds =
-        Number(
-          document.getElementById("seeds").value
-        );
+let tournamentData = null;
 
 
-      /* 入力チェック */
+/* =========================
+   参加者入力欄
+========================= */
 
-      if (players < 2) {
+function createParticipants() {
 
-        alert("参加人数を2人以上で入力してください。");
+  const players = Number(
+    document.getElementById("players").value
+  );
 
-        return;
-      }
-
-
-      if (seeds < 0 || seeds > players) {
-
-        alert("シード人数を正しく入力してください。");
-
-        return;
-      }
+  const seeds = Number(
+    document.getElementById("seeds").value
+  );
 
 
-      /* シード欄 */
-
-      const seedList =
-        document.getElementById("seed-list");
-
-      seedList.innerHTML = "";
+  if (players < 2) {
+    alert("参加人数を2人以上で入力してください。");
+    return;
+  }
 
 
-      for (let i = 1; i <= seeds; i++) {
-
-        const item =
-          document.createElement("div");
-
-        item.className =
-          "participant-item";
-
-        item.innerHTML = `
-          <span class="participant-number">
-            ${i}.
-          </span>
-
-          <input
-            type="text"
-            placeholder="シード${i}の名前"
-            data-type="seed"
-            data-number="${i}"
-          >
-        `;
-
-        seedList.appendChild(item);
-      }
+  if (seeds < 0 || seeds > players) {
+    alert("シード人数を正しく入力してください。");
+    return;
+  }
 
 
-      /* 一般参加者欄 */
+  const seedList =
+    document.getElementById("seed-list");
 
-      const normalCount =
-        players - seeds;
-
-      const normalList =
-        document.getElementById("normal-list");
-
-      normalList.innerHTML = "";
+  seedList.innerHTML = "";
 
 
-      for (let i = 1; i <= normalCount; i++) {
+  for (let i = 1; i <= seeds; i++) {
 
-        const item =
-          document.createElement("div");
+    const item =
+      document.createElement("div");
 
-        item.className =
-          "participant-item";
+    item.className =
+      "participant-item";
 
-        item.innerHTML = `
-          <span class="participant-number">
-            ${i}.
-          </span>
+    item.innerHTML = `
+      <span class="participant-number">
+        ${i}.
+      </span>
 
-          <input
-            type="text"
-            placeholder="参加者${i}の名前"
-            data-type="normal"
-            data-number="${i}"
-          >
-        `;
+      <input
+        type="text"
+        placeholder="シード${i}の名前"
+        data-type="seed"
+        data-number="${i}"
+      >
+    `;
 
-        normalList.appendChild(item);
-      }
-
-
-      /* 表示 */
-
-      document.getElementById(
-        "participant-area"
-      ).style.display = "block";
+    seedList.appendChild(item);
+  }
 
 
-      /* 入力欄までスクロール */
+  const normalCount =
+    players - seeds;
 
-      document.getElementById(
-        "participant-area"
-      ).scrollIntoView({
-        behavior: "smooth"
+  const normalList =
+    document.getElementById("normal-list");
+
+  normalList.innerHTML = "";
+
+
+  for (let i = 1; i <= normalCount; i++) {
+
+    const item =
+      document.createElement("div");
+
+    item.className =
+      "participant-item";
+
+    item.innerHTML = `
+      <span class="participant-number">
+        ${i}.
+      </span>
+
+      <input
+        type="text"
+        placeholder="参加者${i}の名前"
+        data-type="normal"
+        data-number="${i}"
+      >
+    `;
+
+    normalList.appendChild(item);
+  }
+
+
+  document.getElementById(
+    "participant-area"
+  ).style.display = "block";
+
+
+  document.getElementById(
+    "tournament-area"
+  ).style.display = "none";
+
+
+  document.getElementById(
+    "participant-area"
+  ).scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+
+/* =========================
+   次に近い2の累乗を取得
+========================= */
+
+function getBracketSize(count) {
+
+  let size = 1;
+
+  while (size < count) {
+    size *= 2;
+  }
+
+  return size;
+}
+
+
+/* =========================
+   シード配置順
+========================= */
+
+function getSeedPositions(size) {
+
+  let positions = [1, 2];
+
+  while (positions.length < size) {
+
+    const nextSize =
+      positions.length * 2;
+
+    const next = [];
+
+    for (const pos of positions) {
+
+      next.push(pos);
+      next.push(nextSize + 1 - pos);
+
+    }
+
+    positions = next;
+  }
+
+  return positions;
+}
+
+
+/* =========================
+   配列シャッフル
+========================= */
+
+function shuffle(array) {
+
+  const result = [...array];
+
+  for (
+    let i = result.length - 1;
+    i > 0;
+    i--
+  ) {
+
+    const j =
+      Math.floor(Math.random() * (i + 1));
+
+    [
+      result[i],
+      result[j]
+    ] = [
+      result[j],
+      result[i]
+    ];
+  }
+
+  return result;
+}
+
+
+/* =========================
+   大会表作成
+========================= */
+
+function createTournament() {
+
+  const game =
+    document.getElementById("game").value;
+
+  const players =
+    Number(
+      document.getElementById("players").value
+    );
+
+  const seeds =
+    Number(
+      document.getElementById("seeds").value
+    );
+
+
+  if (!game) {
+
+    alert("大会種目を選択してください。");
+    return;
+  }
+
+
+  if (game !== "hanafuda") {
+
+    alert(
+      "現在は花札大会表のみ作成できます。"
+    );
+
+    return;
+  }
+
+
+  if (players < 2) {
+
+    alert(
+      "参加人数を2人以上で入力してください。"
+    );
+
+    return;
+  }
+
+
+  /* シード取得 */
+
+  const seedInputs =
+    document.querySelectorAll(
+      'input[data-type="seed"]'
+    );
+
+  const normalInputs =
+    document.querySelectorAll(
+      'input[data-type="normal"]'
+    );
+
+
+  const seedPlayers = [];
+
+  seedInputs.forEach(input => {
+
+    const name =
+      input.value.trim();
+
+    if (name) {
+      seedPlayers.push(name);
+    }
+
+  });
+
+
+  const normalPlayers = [];
+
+  normalInputs.forEach(input => {
+
+    const name =
+      input.value.trim();
+
+    if (name) {
+      normalPlayers.push(name);
+    }
+
+  });
+
+
+  const allPlayers =
+    [
+      ...seedPlayers,
+      ...normalPlayers
+    ];
+
+
+  if (allPlayers.length !== players) {
+
+    alert(
+      `参加者名をすべて入力してください。\n` +
+      `現在 ${allPlayers.length}人 / ${players}人`
+    );
+
+    return;
+  }
+
+
+  /* 重複チェック */
+
+  const unique =
+    new Set(allPlayers);
+
+  if (unique.size !== allPlayers.length) {
+
+    alert(
+      "同じ名前の参加者が複数います。"
+    );
+
+    return;
+  }
+
+
+  /* トーナメント枠 */
+
+  const bracketSize =
+    getBracketSize(players);
+
+  const rounds =
+    Math.log2(bracketSize);
+
+
+  /*
+    1回戦の枠を作る
+
+    シードは決められた位置へ配置。
+    一般参加者は残りの枠へランダム配置。
+  */
+
+  const slots =
+    new Array(bracketSize).fill(null);
+
+
+  const seedPositions =
+    getSeedPositions(bracketSize);
+
+
+  seedPlayers.forEach(
+    (player, index) => {
+
+      const position =
+        seedPositions[index];
+
+      slots[position - 1] =
+        player;
+    }
+  );
+
+
+  /* 一般参加者をシャッフル */
+
+  const shuffledNormals =
+    shuffle(normalPlayers);
+
+
+  let normalIndex = 0;
+
+  for (
+    let i = 0;
+    i < slots.length;
+    i++
+  ) {
+
+    if (
+      slots[i] === null &&
+      normalIndex < shuffledNormals.length
+    ) {
+
+      slots[i] =
+        shuffledNormals[normalIndex];
+
+      normalIndex++;
+    }
+  }
+
+
+  /* データ保存 */
+
+  tournamentData = {
+
+    game: "hanafuda",
+
+    playerCount: players,
+
+    bracketSize: bracketSize,
+
+    rounds: rounds,
+
+    slots: slots,
+
+    matches: [],
+
+    hosts: {}
+
+  };
+
+
+  createMatches();
+
+  renderTournament();
+
+
+  document.getElementById(
+    "tournament-area"
+  ).style.display = "block";
+
+
+  document.getElementById(
+    "tournament-area"
+  ).scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+
+/* =========================
+   試合データ作成
+========================= */
+
+function createMatches() {
+
+  tournamentData.matches = [];
+
+
+  let currentSlots =
+    tournamentData.slots;
+
+
+  for (
+    let round = 0;
+    round < tournamentData.rounds;
+    round++
+  ) {
+
+    const matchCount =
+      currentSlots.length / 2;
+
+    const roundMatches = [];
+
+
+    for (
+      let i = 0;
+      i < matchCount;
+      i++
+    ) {
+
+      const player1 =
+        currentSlots[i * 2];
+
+      const player2 =
+        currentSlots[i * 2 + 1];
+
+
+      roundMatches.push({
+
+        player1:
+          player1,
+
+        player2:
+          player2,
+
+        winner:
+          null,
+
+        host:
+          null
+
       });
 
     }
 
 
-    function createTournament() {
+    tournamentData.matches.push(
+      roundMatches
+    );
 
-      const game =
-        document.getElementById("game").value;
 
-      const players =
-        Number(
-          document.getElementById("players").value
+    currentSlots =
+      new Array(matchCount).fill(null);
+  }
+}
+
+
+/* =========================
+   大会表表示
+========================= */
+
+function renderTournament() {
+
+  const bracket =
+    document.getElementById("bracket");
+
+  bracket.innerHTML = "";
+
+
+  const info =
+    document.getElementById("bracket-info");
+
+
+  info.innerHTML =
+    `参加人数：${tournamentData.playerCount}人　` +
+    `｜ トーナメント枠：${tournamentData.bracketSize}人枠　` +
+    `｜ 不戦勝：${
+      tournamentData.bracketSize -
+      tournamentData.playerCount
+    }枠`;
+
+
+  tournamentData.matches.forEach(
+    (roundMatches, roundIndex) => {
+
+      const round =
+        document.createElement("div");
+
+      round.className =
+        "bracket-round";
+
+
+      const title =
+        document.createElement("div");
+
+      title.className =
+        "bracket-round-title";
+
+
+      title.textContent =
+        getRoundName(
+          roundIndex,
+          tournamentData.rounds
         );
 
 
-      if (!game) {
-
-        alert("大会種目を選択してください。");
-
-        return;
-      }
+      round.appendChild(title);
 
 
-      if (!players) {
+      roundMatches.forEach(
+        (match, matchIndex) => {
 
-        alert("参加人数を入力してください。");
+          const matchElement =
+            createMatchElement(
+              match,
+              roundIndex,
+              matchIndex
+            );
 
-        return;
-      }
+          round.appendChild(
+            matchElement
+          );
 
-
-      alert(
-        "大会表の生成機能は次の段階で追加します。"
+        }
       );
 
-    }
 
-  </script>
+      bracket.appendChild(round);
+
+    }
+  );
+}
+
+
+/* =========================
+   ラウンド名
+========================= */
+
+function getRoundName(
+  roundIndex,
+  totalRounds
+) {
+
+  const remaining =
+    totalRounds - roundIndex;
+
+
+  if (remaining === 1) {
+    return "決勝";
+  }
+
+  if (remaining === 2) {
+    return "準決勝";
+  }
+
+  if (remaining === 3) {
+    return "準々決勝";
+  }
+
+  return `${remaining}回戦`;
+}
+
+
+/* =========================
+   試合作成
+========================= */
+
+function createMatchElement(
+  match,
+  roundIndex,
+  matchIndex
+) {
+
+  const box =
+    document.createElement("div");
+
+  box.className =
+    "match";
+
+
+  const number =
+    document.createElement("div");
+
+  number.className =
+    "match-number";
+
+  number.textContent =
+    `${matchIndex + 1}試合目`;
+
+  box.appendChild(number);
+
+
+  const players = [
+    match.player1,
+    match.player2
+  ];
+
+
+  players.forEach(
+    (player, playerIndex) => {
+
+      const row =
+        document.createElement("div");
+
+      row.className =
+        "player-row";
+
+
+      const name =
+        document.createElement("span");
+
+      name.className =
+        "player-name";
+
+
+      if (!player) {
+
+        name.innerHTML =
+          `<span class="bye">不戦勝</span>`;
+
+      } else {
+
+        let prefix = "";
+
+        if (
+          match.host === player
+        ) {
+
+          prefix = "◎ ";
+
+        }
+
+        name.textContent =
+          prefix + player;
+      }
+
+
+      row.appendChild(name);
+
+
+      /*
+        両方に名前がある場合、
+        部屋主を指定できる
+      */
+
+      if (
+        player &&
+        players.filter(Boolean).length === 2
+      ) {
+
+        const hostButton =
+          document.createElement("button");
+
+        hostButton.className =
+          "host-button";
+
+
+        if (
+          match.host === player
+        ) {
+
+          hostButton.classList.add(
+            "active"
+          );
+
+        }
+
+
+        hostButton.textContent =
+          match.host === player
+            ? "◎ 部屋主"
+            : "部屋主にする";
+
+
+        hostButton.onclick = () => {
+
+          match.host = player;
+
+          renderTournament();
+
+        };
+
+
+        row.appendChild(
+          hostButton
+        );
+      }
+
+
+      box.appendChild(row);
+
+    }
+  );
+
+
+  /*
+    不戦勝なら自動的に勝者を決定
+  */
+
+  if (
+    (match.player1 && !match.player2) ||
+    (!match.player1 && match.player2)
+  ) {
+
+    const winner =
+      match.player1 ||
+      match.player2;
+
+
+    const byeText =
+      document.createElement("div");
+
+    byeText.style.marginTop =
+      "8px";
+
+    byeText.style.fontSize =
+      "12px";
+
+    byeText.style.color =
+      "#756b5f";
+
+    byeText.textContent =
+      `→ ${winner} が不戦勝`;
+
+    box.appendChild(
+      byeText
+    );
+  }
+
+
+  return box;
+}
+
+</script>
 
 </body>
 </html>
