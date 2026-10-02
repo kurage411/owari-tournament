@@ -1,11 +1,10 @@
-```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>大会運営｜尾張藩大会</title>
+  <title>運営管理 | 尾張藩主催 花札・麻雀大会</title>
 
   <style>
     * {
@@ -21,362 +20,188 @@
         serif;
 
       color: #2b2926;
-      background-color: #f3ead5;
 
-      background-image:
+      background:
+        linear-gradient(
+          rgba(255, 250, 235, 0.82),
+          rgba(255, 250, 235, 0.82)
+        ),
         repeating-linear-gradient(
           0deg,
           transparent,
           transparent 3px,
           rgba(80, 60, 40, 0.025) 4px
         );
+
+      background-color: #f3ead5;
+      min-height: 100vh;
     }
 
+    /* 全体 */
     .container {
       width: min(900px, 92%);
       margin: 0 auto;
-      padding: 35px 0 60px;
+      padding: 50px 0 60px;
     }
 
-    header {
+    /* 上部 */
+    .header {
       text-align: center;
-      margin-bottom: 35px;
+      margin-bottom: 40px;
     }
 
-    .small-title {
-      font-size: 13px;
-      letter-spacing: 0.25em;
+    .header-kamon {
+      font-size: 38px;
+      color: #263d52;
+      margin-bottom: 18px;
+    }
+
+    .header-subtitle {
+      font-size: 14px;
+      letter-spacing: 0.35em;
       color: #6d6255;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(28px, 6vw, 42px);
+      font-size: clamp(26px, 5vw, 40px);
       font-weight: normal;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.12em;
       color: #263d52;
     }
 
-    .line {
-      width: 100px;
+    .header-line {
+      width: 120px;
       height: 2px;
-      margin: 18px auto;
       background: #a33a32;
+      margin: 22px auto;
     }
 
-    .description {
-      margin: 0;
-      color: #756b5f;
-      font-size: 13px;
-      letter-spacing: 0.08em;
+    /* カテゴリセクション */
+    .admin-section {
+      margin-bottom: 40px;
     }
 
-    .panel {
-      margin-bottom: 25px;
-      padding: 25px;
-      background: rgba(255, 252, 241, 0.78);
-      border: 1px solid #a99b83;
-    }
-
-    .panel-title {
-      margin: 0 0 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #b9ad99;
+    .category-title {
       font-size: 20px;
       font-weight: normal;
       color: #263d52;
-      letter-spacing: 0.12em;
-    }
-
-    .form-row {
-      margin-bottom: 20px;
-    }
-
-    .form-row:last-child {
-      margin-bottom: 0;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 13px;
-      color: #5e554c;
-      letter-spacing: 0.08em;
-    }
-
-    select,
-    input[type="number"],
-    input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #aaa08f;
-      background: #fffdf5;
-      font-family: inherit;
-      font-size: 15px;
-      color: #2b2926;
-      outline: none;
-    }
-
-    select:focus,
-    input:focus {
-      border-color: #263d52;
-    }
-
-    .number-input {
-      max-width: 220px;
-    }
-
-    .notice {
-      padding: 14px 16px;
-      margin-top: 15px;
-      background: rgba(38, 61, 82, 0.06);
-      border-left: 3px solid #263d52;
-      font-size: 13px;
-      line-height: 1.8;
-      color: #5e554c;
-    }
-
-    .warning {
-      border-left-color: #a33a32;
-      background: rgba(163, 58, 50, 0.06);
-    }
-
-    .button-area {
-      text-align: center;
-      margin-top: 30px;
-    }
-
-    button {
-      padding: 14px 45px;
-      border: none;
-      background: #263d52;
-      color: #fffaf0;
-      font-family: inherit;
-      font-size: 15px;
       letter-spacing: 0.15em;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #314e67;
-    }
-
-    button:disabled {
-      background: #aaa08f;
-      cursor: not-allowed;
-    }
-
-    .danger-button {
-      background: #8d302b;
-    }
-
-    .danger-button:hover {
-      background: #a33a32;
-    }
-
-    #participant-area,
-    #tournament-area {
-      display: none;
-    }
-
-    .participant-group {
-      margin-bottom: 30px;
-    }
-
-    .participant-group:last-child {
-      margin-bottom: 0;
-    }
-
-    .participant-title {
-      margin-bottom: 15px;
-      color: #a33a32;
-      font-size: 16px;
-      letter-spacing: 0.1em;
-    }
-
-    .participant-list {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding-bottom: 8px;
+      border-bottom: 1px solid #817563;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
       gap: 10px;
     }
 
-    .participant-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .participant-number {
-      width: 30px;
-      text-align: right;
-      color: #756b5f;
-      font-size: 13px;
-      flex-shrink: 0;
-    }
-
-    .participant-item input {
-      flex: 1;
-    }
-
-    .fixed-message {
-      padding: 15px;
-      margin-top: 20px;
-      background: rgba(38, 61, 82, 0.07);
-      border: 1px solid #aaa08f;
+    .category-badge {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
       text-align: center;
-      line-height: 1.8;
-      font-size: 13px;
+      background: #263d52;
+      color: #f3ead5;
+      border-radius: 50%;
+      font-size: 16px;
     }
 
-    .back {
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    /* 管理用ボタン */
+    .admin-card {
       display: block;
-      margin-top: 30px;
-      text-align: center;
-      color: #756b5f;
+      padding: 28px 20px;
       text-decoration: none;
+      text-align: center;
+
+      background: rgba(255, 252, 241, 0.72);
+      border: 1px solid #a99b83;
+
+      color: #2b2926;
+
+      transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .admin-card:hover {
+      transform: translateY(-3px);
+      background: #fffaf0;
+      box-shadow: 0 6px 16px rgba(70, 55, 40, 0.12);
+    }
+
+    .admin-card h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      font-weight: normal;
+      letter-spacing: 0.12em;
+      color: #263d52;
+    }
+
+    .card-arrow {
+      color: #a33a32;
+      font-size: 13px;
+      letter-spacing: 0.15em;
+    }
+
+    /* ログアウト・戻るボタン */
+    .logout-area {
+      margin-top: 45px;
+      text-align: center;
+    }
+
+    .logout-link {
+      display: inline-block;
+      padding: 10px 25px;
+
+      color: #5c5147;
+      text-decoration: none;
+
+      border: 1px solid #aaa08f;
+      background: rgba(255, 252, 241, 0.5);
+
+      font-size: 13px;
+      letter-spacing: 0.12em;
+
+      transition: background 0.2s ease;
+    }
+
+    .logout-link:hover {
+      background: #fffaf0;
+    }
+
+    /* 下部 */
+    footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid #b9ad99;
+
+      text-align: center;
+      color: #81766a;
       font-size: 12px;
       letter-spacing: 0.1em;
     }
 
-    .back:hover {
-      color: #263d52;
-    }
-
-    /* 大会表 */
-
-    .bracket-info {
-      margin-bottom: 20px;
-      padding: 14px 16px;
-      background: rgba(38, 61, 82, 0.06);
-      border-left: 3px solid #263d52;
-      font-size: 13px;
-      line-height: 1.8;
-    }
-
-    .bracket-round {
-      margin-bottom: 35px;
-    }
-
-    .bracket-round-title {
-      margin-bottom: 15px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #b9ad99;
-      color: #263d52;
-      font-size: 18px;
-    }
-
-    .match {
-      margin-bottom: 15px;
-      padding: 12px;
-      background: #fffdf5;
-      border: 1px solid #aaa08f;
-    }
-
-    .match-number {
-      margin-bottom: 8px;
-      color: #756b5f;
-      font-size: 12px;
-    }
-
-    .player-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-height: 38px;
-      padding: 5px 0;
-      border-bottom: 1px solid #e3dac8;
-    }
-
-    .player-row:last-child {
-      border-bottom: none;
-    }
-
-    .player-name {
-      flex: 1;
-      line-height: 1.5;
-    }
-
-    .host-button {
-      width: auto;
-      padding: 5px 10px;
-      background: transparent;
-      color: #263d52;
-      border: 1px solid #aaa08f;
-      font-size: 12px;
-      letter-spacing: 0;
-    }
-
-    .host-button:hover {
-      background: rgba(38, 61, 82, 0.06);
-    }
-
-    .host-button.active {
-      background: #263d52;
-      color: #fffaf0;
-    }
-
-    .bye {
-      color: #9b8f80;
-      font-style: italic;
-    }
-
-    .seed-mark {
-      color: #a33a32;
-      font-size: 12px;
-      margin-left: 5px;
-    }
-
-    .seed-exempt {
-      color: #756b5f;
-      font-size: 12px;
-      font-style: italic;
-    }
-
-    .match-status {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid #e3dac8;
-      color: #756b5f;
-      font-size: 12px;
-    }
-
-    .confirmed {
-      border-left: 3px solid #263d52;
-    }
-
+    /* スマホ対応 */
     @media (max-width: 600px) {
-
       .container {
-        padding-top: 25px;
+        padding-top: 35px;
       }
 
-      .panel {
-        padding: 20px 16px;
-      }
-
-      .participant-list {
+      .btn-grid {
         grid-template-columns: 1fr;
       }
 
-      .number-input {
-        max-width: none;
-      }
-
-      button {
-        width: 100%;
-      }
-
-      .match {
-        padding: 10px;
-      }
-
-      .player-row {
-        font-size: 14px;
-      }
-
-      .host-button {
-        padding: 5px 8px;
+      .admin-card {
+        padding: 22px 15px;
       }
     }
   </style>
@@ -384,1789 +209,92 @@
 
 <body>
 
-<main class="container">
+  <main class="container">
 
-  <header>
+    <!-- ヘッダー -->
+    <header class="header">
 
-    <div class="small-title">
-      尾張藩主催
-    </div>
+      <div class="header-kamon">紋</div>
 
-    <h1>
-      大会運営
-    </h1>
-
-    <div class="line"></div>
-
-    <p class="description">
-      大会設定・参加者登録
-    </p>
-
-  </header>
-
-
-  <!-- =========================
-       大会設定
-  ========================== -->
-
-  <section class="panel">
-
-    <h2 class="panel-title">
-      大会設定
-    </h2>
-
-
-    <div class="form-row">
-
-      <label for="game">
-        大会種目
-      </label>
-
-      <select id="game">
-
-        <option value="">
-          選択してください
-        </option>
-
-        <option value="hanafuda">
-          花札
-        </option>
-
-        <option value="mahjong">
-          麻雀
-        </option>
-
-      </select>
-
-    </div>
-
-
-    <div class="form-row">
-
-      <label for="players">
-        参加人数
-      </label>
-
-      <input
-        type="number"
-        id="players"
-        class="number-input"
-        min="2"
-        max="256"
-        placeholder="例：32"
-      >
-
-      <div class="notice">
-        参加人数に応じて必要なトーナメント枠を自動計算します。
+      <div class="header-subtitle">
+        尾張藩主催
       </div>
 
-    </div>
+      <h1>
+        大会運営 管理盤
+      </h1>
+
+      <div class="header-line"></div>
+
+    </header>
 
 
-    <div class="form-row">
+    <!-- 花札 管理 -->
+    <section class="admin-section">
 
-      <label for="seeds">
-        シード人数
-      </label>
+      <h2 class="category-title">
+        <span class="category-badge">花</span>
+        花札大会 管理
+      </h2>
 
-      <input
-        type="number"
-        id="seeds"
-        class="number-input"
-        min="0"
-        max="256"
-        value="0"
-      >
+      <div class="btn-grid">
 
-      <div class="notice">
-        シード参加者は1回戦を免除し、2回戦から参加します。
-        シードの配置位置はブラウザ側で固定ルールにより決定します。
+        <a href="hfow10245-create.html" class="admin-card">
+          <h3>トーナメント表作成</h3>
+          <div class="card-arrow">作成画面へ →</div>
+        </a>
+
+        <a href="hfow10245-manage.html" class="admin-card">
+          <h3>大会運営</h3>
+          <div class="card-arrow">運営画面へ →</div>
+        </a>
+
       </div>
 
-    </div>
+    </section>
 
 
-    <div class="button-area">
+    <!-- 麻雀 管理 -->
+    <section class="admin-section">
 
-      <button
-        id="create-participant-button"
-        onclick="createParticipants()"
-      >
-        参加者入力欄を作成
-      </button>
+      <h2 class="category-title">
+        <span class="category-badge">牌</span>
+        麻雀大会 管理
+      </h2>
 
-    </div>
+      <div class="btn-grid">
 
-  </section>
+        <a href="mjow10245-create.html" class="admin-card">
+          <h3>トーナメント表作成</h3>
+          <div class="card-arrow">作成画面へ →</div>
+        </a>
 
+        <a href="mjow10245-manage.html" class="admin-card">
+          <h3>大会運営</h3>
+          <div class="card-arrow">運営画面へ →</div>
+        </a>
 
-  <!-- =========================
-       参加者
-  ========================== -->
-
-  <section
-    class="panel"
-    id="participant-area"
-  >
-
-    <h2 class="panel-title">
-      参加者登録
-    </h2>
-
-
-    <div
-      class="participant-group"
-      id="seed-group"
-    >
-
-      <div class="participant-title">
-        ◆ シード参加者
       </div>
 
-      <div
-        class="participant-list"
-        id="seed-list"
-      ></div>
+    </section>
 
-    </div>
 
+    <!-- ログアウト / トップへ戻る -->
+    <section class="logout-area">
 
-    <div
-      class="participant-group"
-      id="normal-group"
-    >
+      <a href="index.html" class="logout-link">
+        表紙に戻る（ログアウト）
+      </a>
 
-      <div class="participant-title">
-        ◆ シード以外の参加者
-      </div>
+    </section>
 
-      <div
-        class="participant-list"
-        id="normal-list"
-      ></div>
 
-      <div class="notice">
-        入力した順番をそのまま大会表へ使用します。
-        ブラウザ側でシャッフルは行いません。
-      </div>
+    <!-- フッター -->
+    <footer>
+      尾張藩主催 花札・麻雀大会 運営管理
+    </footer>
 
-    </div>
-
-
-    <div
-      class="button-area"
-      id="create-tournament-area"
-    >
-
-      <button onclick="confirmCreateTournament()">
-        大会表を確定
-      </button>
-
-    </div>
-
-  </section>
-
-
-  <!-- =========================
-       大会表
-  ========================== -->
-
-  <section
-    class="panel"
-    id="tournament-area"
-  >
-
-    <h2 class="panel-title">
-      花札大会表
-    </h2>
-
-    <div
-      class="bracket-info"
-      id="bracket-info"
-    ></div>
-
-    <div id="bracket"></div>
-
-
-    <div
-      class="fixed-message"
-      id="fixed-message"
-    >
-      大会表は確定しています。<br>
-      参加者名を編集しても、トーナメントの配置は変更されません。
-    </div>
-
-
-    <div class="button-area">
-
-      <button
-        class="danger-button"
-        onclick="resetTournament()"
-      >
-        大会表をリセットして再生成
-      </button>
-
-    </div>
-
-  </section>
-
-
-  <a
-    href="index.html"
-    class="back"
-  >
-    ← 大会トップへ戻る
-  </a>
-
-</main>
-
-
-<script>
-
-/* =========================================================
-   大会データ
-========================================================= */
-
-let tournamentData = null;
-
-
-/* =========================================================
-   参加者入力欄作成
-========================================================= */
-
-function createParticipants() {
-
-  if (tournamentData) {
-
-    const result =
-      confirm(
-        "すでに大会表が確定しています。\n\n" +
-        "参加者入力欄を作り直すと、現在の大会表をリセットする必要があります。\n\n" +
-        "続行しますか？"
-      );
-
-    if (!result) {
-      return;
-    }
-
-    tournamentData = null;
-  }
-
-
-  const players =
-    Number(
-      document.getElementById("players").value
-    );
-
-  const seeds =
-    Number(
-      document.getElementById("seeds").value
-    );
-
-
-  if (players < 2) {
-
-    alert(
-      "参加人数を2人以上で入力してください。"
-    );
-
-    return;
-  }
-
-
-  if (players > 256) {
-
-    alert(
-      "参加人数は256人以下で設定してください。"
-    );
-
-    return;
-  }
-
-
-  if (seeds < 0 || seeds > players) {
-
-    alert(
-      "シード人数を正しく入力してください。"
-    );
-
-    return;
-  }
-
-
-  const bracketSize =
-    getBracketSize(players);
-
-
-  /*
-    シード人数が多すぎる場合のチェック。
-
-    1回戦免除なので、
-    2回戦の枠数を超えるシードは設定できない。
-  */
-
-  const maxSeeds =
-    bracketSize / 2;
-
-
-  if (seeds > maxSeeds) {
-
-    alert(
-      `この人数ではシードは最大${maxSeeds}人までです。`
-    );
-
-    return;
-  }
-
-
-  /* シード入力欄 */
-
-  const seedList =
-    document.getElementById("seed-list");
-
-  seedList.innerHTML = "";
-
-
-  if (seeds === 0) {
-
-    seedList.innerHTML =
-      `<div class="notice">
-        シード参加者は設定されていません。
-      </div>`;
-
-  } else {
-
-    for (
-      let i = 1;
-      i <= seeds;
-      i++
-    ) {
-
-      const item =
-        document.createElement("div");
-
-      item.className =
-        "participant-item";
-
-
-      item.innerHTML = `
-
-        <span class="participant-number">
-          ${i}.
-        </span>
-
-        <input
-          type="text"
-          placeholder="シード${i}の名前"
-          data-type="seed"
-          data-number="${i}"
-        >
-
-      `;
-
-
-      seedList.appendChild(item);
-    }
-  }
-
-
-  /* 通常参加者 */
-
-  const normalCount =
-    players - seeds;
-
-
-  const normalList =
-    document.getElementById("normal-list");
-
-  normalList.innerHTML = "";
-
-
-  for (
-    let i = 1;
-    i <= normalCount;
-    i++
-  ) {
-
-    const item =
-      document.createElement("div");
-
-    item.className =
-      "participant-item";
-
-
-    item.innerHTML = `
-
-      <span class="participant-number">
-        ${i}.
-      </span>
-
-      <input
-        type="text"
-        placeholder="参加者${i}の名前"
-        data-type="normal"
-        data-number="${i}"
-      >
-
-    `;
-
-
-    normalList.appendChild(item);
-  }
-
-
-  document.getElementById(
-    "participant-area"
-  ).style.display = "block";
-
-
-  document.getElementById(
-    "tournament-area"
-  ).style.display = "none";
-
-
-  document.getElementById(
-    "participant-area"
-  ).scrollIntoView({
-    behavior: "smooth"
-  });
-}
-
-
-/* =========================================================
-   次に近い2の累乗
-========================================================= */
-
-function getBracketSize(count) {
-
-  let size = 1;
-
-
-  while (size < count) {
-    size *= 2;
-  }
-
-
-  return size;
-}
-
-
-/* =========================================================
-   シード配置位置
-=========================================================
-
-   一般的なトーナメントのシード配置ルール。
-
-   例：32枠
-
-   1
-   16
-   17
-   32
-   ...
-
-   シード人数が4人なら
-   1 / 16 / 17 / 32
-
-   シード人数が8人なら
-   1 / 8 / 9 / 16 / 17 / 24 / 25 / 32
-
-   のように固定配置する。
-
-   ※ランダム処理なし
-========================================================= */
-
-function getSeedPositions(size) {
-
-  if (size <= 1) {
-    return [1];
-  }
-
-
-  let positions = [1, 2];
-
-
-  while (
-    positions.length < size
-  ) {
-
-    const nextSize =
-      positions.length * 2;
-
-    const next = [];
-
-
-    for (
-      const pos of positions
-    ) {
-
-      next.push(pos);
-
-      next.push(
-        nextSize + 1 - pos
-      );
-
-    }
-
-
-    positions = next;
-  }
-
-
-  return positions;
-}
-
-
-/* =========================================================
-   シード位置を取得
-========================================================= */
-
-function getSelectedSeedPositions(
-  bracketSize,
-  seedCount
-) {
-
-  const allPositions =
-    getSeedPositions(bracketSize);
-
-
-  /*
-    全枠分のシード位置から、
-    必要な人数分だけ使用する。
-  */
-
-  return allPositions.slice(
-    0,
-    seedCount
-  );
-}
-
-
-/* =========================================================
-   大会表作成確認
-========================================================= */
-
-function confirmCreateTournament() {
-
-  if (tournamentData) {
-
-    alert(
-      "大会表はすでに確定しています。\n\n" +
-      "配置を変更する場合は、下部の\n" +
-      "「大会表をリセットして再生成」\n" +
-      "を使用してください。"
-    );
-
-    return;
-  }
-
-
-  const players =
-    Number(
-      document.getElementById("players").value
-    );
-
-  const seeds =
-    Number(
-      document.getElementById("seeds").value
-    );
-
-
-  const bracketSize =
-    getBracketSize(players);
-
-
-  const result =
-    confirm(
-
-      "大会表を確定します。\n\n" +
-
-      `参加人数：${players}人\n` +
-
-      `シード：${seeds}人\n` +
-
-      `トーナメント枠：${bracketSize}枠\n\n` +
-
-      "通常参加者は入力順のまま配置されます。\n" +
-
-      "ブラウザ上でシャッフルは行いません。\n\n" +
-
-      "一度確定した大会表は、通常操作では配置が変わりません。\n\n" +
-
-      "この内容で大会表を確定しますか？"
-
-    );
-
-
-  if (!result) {
-    return;
-  }
-
-
-  createTournament();
-}
-
-
-/* =========================================================
-   大会表作成
-========================================================= */
-
-function createTournament() {
-
-  const game =
-    document.getElementById("game").value;
-
-  const players =
-    Number(
-      document.getElementById("players").value
-    );
-
-  const seeds =
-    Number(
-      document.getElementById("seeds").value
-    );
-
-
-  if (!game) {
-
-    alert(
-      "大会種目を選択してください。"
-    );
-
-    return;
-  }
-
-
-  if (game !== "hanafuda") {
-
-    alert(
-      "現在は花札大会表のみ作成できます。"
-    );
-
-    return;
-  }
-
-
-  if (players < 2) {
-
-    alert(
-      "参加人数を2人以上で入力してください。"
-    );
-
-    return;
-  }
-
-
-  /* -------------------------
-     シード取得
-  ------------------------- */
-
-  const seedInputs =
-    document.querySelectorAll(
-      'input[data-type="seed"]'
-    );
-
-
-  const normalInputs =
-    document.querySelectorAll(
-      'input[data-type="normal"]'
-    );
-
-
-  const seedPlayers = [];
-
-
-  seedInputs.forEach(
-    input => {
-
-      const name =
-        input.value.trim();
-
-
-      if (name) {
-        seedPlayers.push(name);
-      }
-
-    }
-  );
-
-
-  const normalPlayers = [];
-
-
-  normalInputs.forEach(
-    input => {
-
-      const name =
-        input.value.trim();
-
-
-      if (name) {
-        normalPlayers.push(name);
-      }
-
-    }
-  );
-
-
-  const allPlayers =
-    [
-      ...seedPlayers,
-      ...normalPlayers
-    ];
-
-
-  /* -------------------------
-     人数チェック
-  ------------------------- */
-
-  if (
-    allPlayers.length !== players
-  ) {
-
-    alert(
-
-      `参加者名をすべて入力してください。\n` +
-
-      `現在 ${allPlayers.length}人 / ${players}人`
-
-    );
-
-    return;
-  }
-
-
-  /* -------------------------
-     重複チェック
-  ------------------------- */
-
-  const unique =
-    new Set(allPlayers);
-
-
-  if (
-    unique.size !== allPlayers.length
-  ) {
-
-    alert(
-      "同じ名前の参加者が複数います。"
-    );
-
-    return;
-  }
-
-
-  /* -------------------------
-     トーナメント枠
-  ------------------------- */
-
-  const bracketSize =
-    getBracketSize(players);
-
-
-  const rounds =
-    Math.log2(bracketSize);
-
-
-  /*
-    全枠を作成。
-
-    null
-    = 通常の空き枠
-
-    seed
-    = シード専用枠
-
-  */
-
-  const slots =
-    new Array(bracketSize)
-      .fill(null);
-
-
-  /* -------------------------
-     シード配置
-  ------------------------- */
-
-  const seedPositions =
-    getSelectedSeedPositions(
-      bracketSize,
-      seedPlayers.length
-    );
-
-
-  const seedSlotMap = {};
-
-
-  seedPlayers.forEach(
-    (
-      player,
-      index
-    ) => {
-
-      const position =
-        seedPositions[index];
-
-
-      const slotIndex =
-        position - 1;
-
-
-      slots[slotIndex] = {
-
-        type: "seed",
-
-        name: player,
-
-        seedNumber: index + 1
-
-      };
-
-
-      seedSlotMap[slotIndex] =
-        true;
-
-    }
-  );
-
-
-  /* -------------------------
-     通常参加者配置
-  -------------------------
-
-     ★ここではシャッフルしない。
-
-     入力された順番をそのまま使用。
-  */
-
-  let normalIndex = 0;
-
-
-  for (
-    let i = 0;
-    i < slots.length;
-    i++
-  ) {
-
-    if (
-      slots[i] === null &&
-      normalIndex < normalPlayers.length
-    ) {
-
-      slots[i] = {
-
-        type: "normal",
-
-        name:
-          normalPlayers[
-            normalIndex
-          ]
-
-      };
-
-
-      normalIndex++;
-    }
-  }
-
-
-  /* -------------------------
-     大会データ保存
-  ------------------------- */
-
-  tournamentData = {
-
-    game: "hanafuda",
-
-    playerCount: players,
-
-    seedCount:
-      seedPlayers.length,
-
-    bracketSize: bracketSize,
-
-    rounds: rounds,
-
-    slots: slots,
-
-    seedPositions:
-      seedPositions,
-
-    matches: [],
-
-    hosts: {},
-
-    confirmed: true,
-
-    createdAt:
-      new Date().toISOString()
-
-  };
-
-
-  /* -------------------------
-     試合作成
-  ------------------------- */
-
-  createMatches();
-
-
-  /* -------------------------
-     表示
-  ------------------------- */
-
-  renderTournament();
-
-
-  document.getElementById(
-    "tournament-area"
-  ).style.display = "block";
-
-
-  document.getElementById(
-    "tournament-area"
-  ).scrollIntoView({
-    behavior: "smooth"
-  });
-
-
-  /*
-    参加者入力欄を編集しても
-    大会表の配置データは変わらない。
-  */
-
-  lockTournamentCreation();
-}
-
-
-/* =========================================================
-   試合データ作成
-========================================================= */
-
-function createMatches() {
-
-  tournamentData.matches = [];
-
-
-  /*
-    1回戦のスロット。
-
-    通常参加者
-      → 通常の対戦
-
-    シード
-      → 1回戦免除
-
-    null
-      → 通常の空き枠
-  */
-
-  const currentSlots =
-    tournamentData.slots;
-
-
-  /*
-    1回戦
-  */
-
-  const firstRound =
-    [];
-
-
-  const matchCount =
-    currentSlots.length / 2;
-
-
-  for (
-    let i = 0;
-    i < matchCount;
-    i++
-  ) {
-
-    const player1 =
-      currentSlots[
-        i * 2
-      ];
-
-
-    const player2 =
-      currentSlots[
-        i * 2 + 1
-      ];
-
-
-    firstRound.push({
-
-      player1:
-        player1,
-
-      player2:
-        player2,
-
-      winner:
-        null,
-
-      host:
-        null
-
-    });
-  }
-
-
-  tournamentData.matches.push(
-    firstRound
-  );
-
-
-  /*
-    2回戦以降
-
-    まだ勝者が決まっていないので
-    空欄で作成。
-
-    シードは1回戦免除なので、
-    シード専用の進出枠を作る。
-  */
-
-  for (
-    let round = 1;
-    round < tournamentData.rounds;
-    round++
-  ) {
-
-    const previousCount =
-      tournamentData.matches[
-        round - 1
-      ].length;
-
-
-    const currentCount =
-      previousCount / 2;
-
-
-    const roundMatches = [];
-
-
-    for (
-      let i = 0;
-      i < currentCount;
-      i++
-    ) {
-
-      roundMatches.push({
-
-        player1:
-          null,
-
-        player2:
-          null,
-
-        winner:
-          null,
-
-        host:
-          null
-
-      });
-
-    }
-
-
-    tournamentData.matches.push(
-      roundMatches
-    );
-  }
-
-
-  /*
-    シードを2回戦へ進出させる。
-
-    シードが配置された1回戦ブロックを確認し、
-    そのブロックの次ラウンド枠へ
-    自動的に入れる。
-
-  */
-
-  tournamentData.slots.forEach(
-    (
-      slot,
-      slotIndex
-    ) => {
-
-      if (
-        !slot ||
-        slot.type !== "seed"
-      ) {
-        return;
-      }
-
-
-      const firstRoundMatchIndex =
-        Math.floor(
-          slotIndex / 2
-        );
-
-
-      const nextRoundMatchIndex =
-        Math.floor(
-          firstRoundMatchIndex / 2
-        );
-
-
-      const positionInNextMatch =
-        firstRoundMatchIndex % 2;
-
-
-      const nextMatch =
-        tournamentData.matches[1]
-          ? tournamentData.matches[1][
-              nextRoundMatchIndex
-            ]
-          : null;
-
-
-      if (!nextMatch) {
-        return;
-      }
-
-
-      /*
-        同じ2回戦試合にシードが
-        2人入ることは通常ない。
-      */
-
-      if (
-        positionInNextMatch === 0
-      ) {
-
-        nextMatch.player1 = slot;
-
-      } else {
-
-        nextMatch.player2 = slot;
-
-      }
-
-    }
-  );
-}
-
-
-/* =========================================================
-   大会表表示
-========================================================= */
-
-function renderTournament() {
-
-  const bracket =
-    document.getElementById(
-      "bracket"
-    );
-
-
-  bracket.innerHTML = "";
-
-
-  const info =
-    document.getElementById(
-      "bracket-info"
-    );
-
-
-  const normalByes =
-    countNormalByes();
-
-
-  info.innerHTML =
-
-    `参加人数：${tournamentData.playerCount}人` +
-
-    `　｜ トーナメント枠：${tournamentData.bracketSize}枠` +
-
-    `　｜ シード：${tournamentData.seedCount}人` +
-
-    `　｜ 通常の空き枠：${normalByes}枠`;
-
-
-  tournamentData.matches.forEach(
-    (
-      roundMatches,
-      roundIndex
-    ) => {
-
-      const round =
-        document.createElement(
-          "div"
-        );
-
-
-      round.className =
-        "bracket-round";
-
-
-      const title =
-        document.createElement(
-          "div"
-        );
-
-
-      title.className =
-        "bracket-round-title";
-
-
-      title.textContent =
-        getRoundName(
-          roundIndex,
-          tournamentData.rounds
-        );
-
-
-      round.appendChild(title);
-
-
-      roundMatches.forEach(
-        (
-          match,
-          matchIndex
-        ) => {
-
-          const matchElement =
-            createMatchElement(
-              match,
-              roundIndex,
-              matchIndex
-            );
-
-
-          round.appendChild(
-            matchElement
-          );
-
-        }
-      );
-
-
-      bracket.appendChild(
-        round
-      );
-
-    }
-  );
-}
-
-
-/* =========================================================
-   通常の空き枠数
-========================================================= */
-
-function countNormalByes() {
-
-  let count = 0;
-
-
-  tournamentData.slots.forEach(
-    slot => {
-
-      if (slot === null) {
-        count++;
-      }
-
-    }
-  );
-
-
-  return count;
-}
-
-
-/* =========================================================
-   ラウンド名
-========================================================= */
-
-function getRoundName(
-  roundIndex,
-  totalRounds
-) {
-
-  const remaining =
-    totalRounds - roundIndex;
-
-
-  if (remaining === 1) {
-    return "決勝";
-  }
-
-
-  if (remaining === 2) {
-    return "準決勝";
-  }
-
-
-  if (remaining === 3) {
-    return "準々決勝";
-  }
-
-
-  return `${remaining}回戦`;
-}
-
-
-/* =========================================================
-   選手データから名前を取得
-========================================================= */
-
-function getPlayerName(player) {
-
-  if (!player) {
-    return "";
-  }
-
-
-  if (
-    typeof player === "string"
-  ) {
-
-    return player;
-
-  }
-
-
-  return player.name || "";
-}
-
-
-/* =========================================================
-   選手がシードか
-========================================================= */
-
-function isSeedPlayer(player) {
-
-  return (
-    player &&
-    typeof player === "object" &&
-    player.type === "seed"
-  );
-}
-
-
-/* =========================================================
-   試合作成
-========================================================= */
-
-function createMatchElement(
-  match,
-  roundIndex,
-  matchIndex
-) {
-
-  const box =
-    document.createElement(
-      "div"
-    );
-
-
-  box.className =
-    "match";
-
-
-  const number =
-    document.createElement(
-      "div"
-    );
-
-
-  number.className =
-    "match-number";
-
-
-  number.textContent =
-    `${matchIndex + 1}試合目`;
-
-
-  box.appendChild(number);
-
-
-  const players = [
-
-    match.player1,
-
-    match.player2
-
-  ];
-
-
-  players.forEach(
-    (
-      player,
-      playerIndex
-    ) => {
-
-      const row =
-        document.createElement(
-          "div"
-        );
-
-
-      row.className =
-        "player-row";
-
-
-      const name =
-        document.createElement(
-          "span"
-        );
-
-
-      name.className =
-        "player-name";
-
-
-      /* -------------------------
-         空欄
-      ------------------------- */
-
-      if (!player) {
-
-        name.innerHTML =
-          `<span class="bye">
-            対戦相手未定
-          </span>`;
-
-      }
-
-
-      /* -------------------------
-         シード
-      ------------------------- */
-
-      else if (
-        isSeedPlayer(player)
-      ) {
-
-        let prefix = "";
-
-
-        if (
-          match.host ===
-          player.name
-        ) {
-
-          prefix = "◎ ";
-
-        }
-
-
-        name.textContent =
-          prefix +
-          player.name;
-
-
-        const mark =
-          document.createElement(
-            "span"
-          );
-
-
-        mark.className =
-          "seed-mark";
-
-
-        mark.textContent =
-          "【シード】";
-
-
-        name.appendChild(mark);
-
-      }
-
-
-      /* -------------------------
-         通常参加者
-      ------------------------- */
-
-      else {
-
-        let prefix = "";
-
-
-        if (
-          match.host ===
-          getPlayerName(player)
-        ) {
-
-          prefix = "◎ ";
-
-        }
-
-
-        name.textContent =
-          prefix +
-          getPlayerName(player);
-
-      }
-
-
-      row.appendChild(name);
-
-
-      /*
-        部屋主指定
-
-        両方に実際の参加者がいる場合のみ
-      */
-
-      if (
-        player &&
-        players.filter(Boolean).length === 2 &&
-        !(
-          roundIndex > 0 &&
-          (
-            isSeedPlayer(
-              players[0]
-            ) ||
-            isSeedPlayer(
-              players[1]
-            )
-          )
-        )
-      ) {
-
-        const hostButton =
-          document.createElement(
-            "button"
-          );
-
-
-        hostButton.className =
-          "host-button";
-
-
-        const playerName =
-          getPlayerName(player);
-
-
-        if (
-          match.host ===
-          playerName
-        ) {
-
-          hostButton.classList.add(
-            "active"
-          );
-
-        }
-
-
-        hostButton.textContent =
-          match.host === playerName
-            ? "◎ 部屋主"
-            : "部屋主にする";
-
-
-        hostButton.onclick = () => {
-
-          match.host =
-            playerName;
-
-
-          renderTournament();
-
-        };
-
-
-        row.appendChild(
-          hostButton
-        );
-      }
-
-
-      box.appendChild(row);
-
-    }
-  );
-
-
-  /*
-    1回戦のシード枠
-  */
-
-  if (
-    roundIndex === 0 &&
-    (
-      isSeedPlayer(
-        match.player1
-      ) ||
-      isSeedPlayer(
-        match.player2
-      )
-    )
-  ) {
-
-    const seedText =
-      document.createElement(
-        "div"
-      );
-
-
-    seedText.className =
-      "match-status";
-
-
-    seedText.innerHTML =
-      "→ シードのため <strong>1回戦免除</strong>";
-
-
-    box.appendChild(
-      seedText
-    );
-
-  }
-
-
-  /*
-    1回戦の通常不戦勝
-
-    シードではなく、
-    片方だけ通常参加者がいる場合
-  */
-
-  else if (
-    roundIndex === 0 &&
-    (
-      (match.player1 && !match.player2) ||
-      (!match.player1 && match.player2)
-    )
-  ) {
-
-    const winner =
-      match.player1 ||
-      match.player2;
-
-
-    const byeText =
-      document.createElement(
-        "div"
-      );
-
-
-    byeText.className =
-      "match-status";
-
-
-    byeText.textContent =
-      `→ ${getPlayerName(winner)} が不戦勝`;
-
-
-    box.appendChild(
-      byeText
-    );
-
-  }
-
-
-  return box;
-}
-
-
-/* =========================================================
-   大会表確定後の操作制限
-========================================================= */
-
-function lockTournamentCreation() {
-
-  const buttonArea =
-    document.getElementById(
-      "create-tournament-area"
-    );
-
-
-  buttonArea.innerHTML = `
-
-    <div class="fixed-message">
-
-      <strong>
-        大会表は確定しました。
-      </strong>
-
-      <br>
-
-      ブラウザによる自動シャッフルはありません。
-
-      <br>
-
-      現在の参加者順・シード配置を
-      そのまま大会表として使用しています。
-
-    </div>
-
-  `;
-
-
-  /*
-    設定欄は編集できるが、
-    編集しても現在の大会表は変化しない。
-
-    これは「大会中に名前だけ直したい」
-    場合を考慮している。
-  */
-
-}
-
-
-/* =========================================================
-   大会表リセット
-========================================================= */
-
-function resetTournament() {
-
-  const result =
-    confirm(
-
-      "【重要】\n\n" +
-
-      "大会表をリセットします。\n\n" +
-
-      "現在のトーナメント配置は破棄されます。\n" +
-
-      "大会本番中に行うと、現在の大会表と一致しなくなる可能性があります。\n\n" +
-
-      "本当にリセットしますか？"
-
-    );
-
-
-  if (!result) {
-    return;
-  }
-
-
-  tournamentData = null;
-
-
-  document.getElementById(
-    "tournament-area"
-  ).style.display = "none";
-
-
-  document.getElementById(
-    "create-tournament-area"
-  ).innerHTML = `
-
-    <button onclick="confirmCreateTournament()">
-      大会表を確定
-    </button>
-
-  `;
-
-
-  alert(
-    "大会表をリセットしました。\n" +
-    "必要な場合は参加者を確認して、もう一度大会表を確定してください。"
-  );
-}
-
-</script>
+  </main>
 
 </body>
 </html>
-```
