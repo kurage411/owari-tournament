@@ -193,13 +193,21 @@
 
   </main>
 
-  <script>
-    // パスワード判定用関数
+<script>
+    const _0x1a = [111, 119, 97, 114, 105, 45, 49, 48, 50, 52, 53];
+
+    function checkPass(str) {
+      if (str.length !== _0x1a.length) return false;
+      for (let i = 0; i < str.length; i++) {
+        if (str.charCodeAt(i) !== _0x1a[i]) return false;
+      }
+      return true;
+    }
+
     function login() {
       const inputPass = document.getElementById("password").value;
 
-      // 直接入力値と比較（難読化処理）
-      if (inputPass === "owari-10245") {
+      if (checkPass(inputPass)) {
         // 認証フラグを保存
         sessionStorage.setItem("admin_authenticated", "true");
         // 管理画面へ遷移
@@ -209,7 +217,7 @@
       }
     }
 
-    // Enterキー押し下げ時の処理
+    // Enterキー対応
     document
       .getElementById("password")
       .addEventListener("keydown", function(event) {
