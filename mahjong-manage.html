@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <script>
+    if (sessionStorage.getItem("admin_authenticated") !== "true") {
+      alert("ログインが必要です。");
+      window.location.href = "admin.html";
+    }
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>麻雀大会 運営・編集｜尾張藩大会</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+      color: #2b2926;
+      background-color: #f3ead5;
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(80, 60, 40, 0.025) 4px);
+    }
+    .container { width: min(1400px, 96%); margin: 0 auto; padding: 35px 0 60px; }
+    header { text-align: center; margin-bottom: 35px; }
+    .small-title { font-size: 13px; letter-spacing: 0.25em; color: #6d6255; margin-bottom: 10px; }
+    h1 { margin: 0; font-size: clamp(28px, 6vw, 42px); font-weight: normal; letter-spacing: 0.15em; color: #1c4b37; }
+    .line { width: 100px; height: 2px; margin: 18px auto; background: #1c4b37; }
+
+    .panel {
+      margin-bottom: 25px; padding: 25px; background: rgba(255, 252, 241, 0.85);
+      border: 1px solid #a99b83; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .panel-title {
+      margin: 0 0 20px; padding-bottom: 10px; border-bottom: 1px solid #b9ad99;
+      font-size: 20px; font-weight: normal; color: #1c4b37; letter-spacing: 0.12em;
+    }
+    .form-row { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; font-size: 13px; color: #5e554c; letter-spacing: 0.08em; }
+    textarea {
+      width: 100%; height: 120px; padding: 12px; border: 1px solid #aaa08f; background: #fffdf5;
+      font-family: inherit; font-size: 14px; color: #2b2926; outline: none; resize: vertical; line-height: 1.6;
+    }
+    .notice {
+      padding: 12px 14px; margin-top: 8px; background: rgba(28, 75, 55, 0.06);
+      border-left: 3px solid #1c4b37; font-size: 12px; line-height: 1.6; color: #5e554c;
+    }
+
+    .button-area { text-align: center; margin-top: 25px; gap: 10px; display: flex; justify-content: center; flex-wrap: wrap; }
+    button {
+      padding: 12px 35px; border: none; background: #1c4b37; color: #fffaf0;
+      font-family: inherit; font-size: 14px; letter-spacing: 0.15em; cursor: pointer; transition: 0.2s;
+    }
+    button:hover { background: #286b4f; }
+    .danger-btn { background: #8d302b; }
+    .danger-btn:hover { background: #a33a32; }
+
+    .search-box {
+      margin-bottom: 20px; display: flex; align-items: center; gap: 10px; background: #fffdf5;
+      padding: 10px 15px; border: 1px solid #a99b83;
+    }
+    .search-box label { margin: 0; white-space: nowrap; font-weight: bold; color: #1c4b37; }
+    .search-box input {
+      flex: 1; padding: 8px 12px; border: 1px solid #aaa08f; font-family: inherit; font-size: 14px; outline: none;
+    }
+
+    .view-tabs {
+      display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #a99b83; padding-bottom: 10px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+    }
+    .tab-btn {
+      background: rgba(255,252,241,0.8); border: 1px solid #a99b83; color: #2b2926;
+      padding: 8px 16px; cursor: pointer; font-size: 13px; white-space: nowrap; flex-shrink: 0;
+    }
+    .tab-btn.active { background: #1c4b37; color: #fffaf0; border-color: #1c4b37; }
+
+    .tree-scroll-wrapper { overflow-x: auto; padding: 20px 0; }
+    .tournament-tree-full { display: flex; align-items: center; min-width: max-content; }
+    .round-column-full { display: flex; flex-direction: column; justify-content: space-around; width: 280px; margin-right: 30px; position: relative; }
+    .round-header { text-align: center; font-size: 15px; color: #1c4b37; border-bottom: 2px solid #1c4b37; padding-bottom: 5px; margin-bottom: 15px; font-weight: bold; }
+
+    .match-group { position: relative; margin: 15px 0; display: flex; flex-direction: column; justify-content: center; flex: 1; }
+    
+    .match-card {
+      background: #fffdf5; border: 1px solid #aaa08f; padding: 10px; position: relative; z-index: 2;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.05); transition: 0.2s;
+    }
+    .match-card.search-match {
+      border: 2px solid #a33a32; background: #fff5f3; box-shadow: 0 0 10px rgba(163, 58, 50, 0.3);
+    }
+
+    .match-num { font-size: 12px; color: #1c4b37; margin-bottom: 6px; text-align: center; font-weight: bold; border-bottom: 1px solid #e3dac8; padding-bottom: 4px; }
+    
+    .player-slot {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 8px; margin: 3px 0; border: 1px solid #e3dac8; background: #fff;
+      cursor: pointer; user-select: none; transition: 0.2s; font-size: 13px;
+    }
+    .player-slot:hover { background: #fdfaf0; }
+    .player-slot.winner { border-color: #1c4b37; background: #f0f7f4; color: #1c4b37; font-weight: bold; }
+    .player-slot.winner .player-name::after { content: " ★(勝ち抜け)"; font-size: 11px; color: #1c4b37; }
+    .player-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .btn-group { display: flex; gap: 4px; flex-shrink: 0; margin-left: 6px; }
+    .host-btn, .rank-btn {
+      font-size: 10px; padding: 2px 5px; border: 1px solid #aaa08f; background: #fdfaef;
+      cursor: pointer; color: #5e554c; border-radius: 2px;
+    }
+    .host-btn.main { background: #1c4b37; color: #fff; border-color: #1c4b37; }
+    .host-btn.sub { background: #6d6255; color: #fff; border-color: #6d6255; }
+
+    .rank-tag { font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 3px; margin-left: 6px; }
+    .rank-1 { background: #ffd700; color: #000; }
+    .rank-2 { background: #c0c0c0; color: #000; }
+    .rank-3 { background: #c47227; color: #fff; }
+
+    .back-link { display: block; text-align: center; margin-top: 30px; color: #756b5f; text-decoration: none; font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<main class="container">
+  <header>
+    <div class="small-title">尾張藩主催</div>
+    <h1>麻雀大会 運営盤（4人対局・2人勝ち抜け）</h1>
+    <div class="line"></div>
+  </header>
+
+  <section class="panel">
+    <h2 class="panel-title">トーナメント枠 手動生成</h2>
+    <div class="form-row">
+      <label for="player-list">参加者一覧（1行に1名記入）</label>
+      <textarea id="player-list" placeholder="例：&#10;織田信長&#10;豊臣秀吉&#10;徳川家康&#10;明智光秀&#10;武田信玄&#10;上杉謙信&#10;伊達政宗&#10;真田幸村"></textarea>
+      <div class="notice">
+        ※4人卓で編成されます。人数が4の倍数でない場合、自動的に「NPC 1」「NPC 2」で補填されます。<br>
+        ※各卓で最大2名まで勝者を選択できます（選択された2名が勝ち抜けます）。
+      </div>
+    </div>
+    <div class="button-area">
+      <button id="btn-generate">入力内容でトーナメント表を作成</button>
+      <button class="danger-btn" id="btn-clear">全データをリセット</button>
+    </div>
+  </section>
+
+  <section class="panel" id="manage-area" style="display:none;">
+    <h2 class="panel-title">対戦結果の入力・部屋主＆順位設定</h2>
+    
+    <div class="search-box">
+      <label for="search-input">🔍 選手検索:</label>
+      <input type="text" id="search-input" placeholder="名前を入力すると対戦枠を強調表示します...">
+    </div>
+
+    <div class="view-tabs" id="tab-container"></div>
+
+    <div id="tree-wrapper"></div>
+  </section>
+
+  <a href="admin-panow10el245.html" class="back-link">← 管理トップへ戻る</a>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBfHItaYSzAD-Y_xUTIU4WCjmTonf8XL7M",
+    authDomain: "owari-yugi.firebaseapp.com",
+    databaseURL: "https://owari-yugi-default-rtdb.firebaseio.com",
+    projectId: "owari-yugi",
+    storageBucket: "owari-yugi.firebasestorage.app",
+    messagingSenderId: "918175087434",
+    appId: "1:918175087434:web:d1069fe295626feaa81fb3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const mahjongRef = ref(db, "mahjong");
+
+  let tournamentData = { players: [], matches: {}, selectedRound: "all", searchQuery: "" };
+
+  onValue(mahjongRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data && data.players && data.players.length > 0) {
+      tournamentData.players = data.players || [];
+      tournamentData.matches = data.matches || {};
+      document.getElementById("player-list").value = tournamentData.players.filter(p => !p.startsWith("NPC")).join("\n");
+      document.getElementById("manage-area").style.display = "block";
+      renderTabs();
+      renderTree();
+    } else {
+      tournamentData = { players: [], matches: {}, selectedRound: "all", searchQuery: "" };
+      document.getElementById("manage-area").style.display = "none";
+    }
+  });
+
+  function saveData() {
+    set(mahjongRef, {
+      players: tournamentData.players,
+      matches: tournamentData.matches || {}
+    });
+  }
+
+  document.getElementById("search-input").addEventListener("input", (e) => {
+    tournamentData.searchQuery = e.target.value.trim().toLowerCase();
+    renderTree();
+  });
+
+  document.getElementById("btn-generate").addEventListener("click", () => {
+    const rawText = document.getElementById("player-list").value.trim();
+    if (!rawText) return alert("参加者を入力してください。");
+    let list = rawText.split("\n").map(s => s.trim()).filter(s => s !== "");
+    if (list.length < 2) return alert("最低2名以上のリストを入力してください。");
+
+    // NPC自動補填（4の倍数にする）
+    let npcCount = 1;
+    while (list.length % 4 !== 0) {
+      list.push(`NPC ${npcCount++}`);
+    }
+
+    if (confirm(`参加者 ${list.length}名（NPC含む）でトーナメント表を生成しますか？`)) {
+      tournamentData.players = list;
+      tournamentData.matches = {};
+      tournamentData.selectedRound = "all";
+      saveData();
+    }
+  });
+
+  document.getElementById("btn-clear").addEventListener("click", () => {
+    if (confirm("麻雀の全データを消去しますか？")) {
+      remove(mahjongRef);
+      document.getElementById("player-list").value = "";
+      document.getElementById("manage-area").style.display = "none";
+    }
+  });
+
+  function getRoundName(r, totalRounds) {
+    if (r === totalRounds - 1) return "決勝戦";
+    if (r === totalRounds - 2) return "準決勝";
+    return `${r + 1}回戦`;
+  }
+
+  function renderTabs() {
+    const tabContainer = document.getElementById("tab-container");
+    if (!tournamentData.players || tournamentData.players.length === 0) return;
+
+    let currentCount = tournamentData.players.length;
+    let totalRounds = 0;
+    while (currentCount > 4) {
+      totalRounds++;
+      currentCount = (currentCount / 4) * 2;
+    }
+    totalRounds++; // 決勝戦分
+
+    let html = `<button class="tab-btn ${tournamentData.selectedRound === 'all' ? 'active' : ''}" data-round="all">全卓表示</button>`;
+    for (let r = 0; r < totalRounds; r++) {
+      const name = getRoundName(r, totalRounds);
+      const active = tournamentData.selectedRound === r ? 'active' : '';
+      html += `<button class="tab-btn ${active}" data-round="${r}">${name}</button>`;
+    }
+    
+    tabContainer.innerHTML = html;
+
+    tabContainer.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const val = e.target.getAttribute("data-round");
+        tournamentData.selectedRound = val === "all" ? "all" : parseInt(val);
+        renderTabs();
+        renderTree();
+      });
+    });
+  }
+
+  function createMatchCardHTML(players, matchKey, title, isFinal) {
+    const query = tournamentData.searchQuery;
+    const matchState = tournamentData.matches[matchKey] || { winners: [], mainHost: null, subHost: null, ranks: {} };
+    const winners = matchState.winners || [];
+    const ranks = matchState.ranks || {};
+
+    let isMatchSearch = false;
+    players.forEach(p => { if (query && p.toLowerCase().includes(query)) isMatchSearch = true; });
+
+    let playersHTML = players.map(p => {
+      if (!p) p = "（未定）";
+      const isWinner = winners.includes(p) && p !== "（未定）";
+      const isMainHost = matchState.mainHost === p;
+      const isSubHost = matchState.subHost === p;
+      const rank = ranks[p];
+
+      let hostLabel = "部屋主";
+      let hostClass = "";
+      if (isMainHost) { hostLabel = "◎ 主部屋主"; hostClass = "main"; }
+      else if (isSubHost) { hostLabel = "〇 副部屋主"; hostClass = "sub"; }
+
+      return `
+        <div class="player-slot ${isWinner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p}">
+          <span class="player-name">${p}</span>
+          ${rank ? `<span class="rank-tag rank-${rank}">${rank}位</span>` : ''}
+          <div class="btn-group">
+            ${isFinal && p !== "（未定）" ? `
+              <button class="rank-btn" data-rank-key="${matchKey}" data-player="${p}" data-rank="1">1位</button>
+              <button class="rank-btn" data-rank-key="${matchKey}" data-player="${p}" data-rank="2">2位</button>
+              <button class="rank-btn" data-rank-key="${matchKey}" data-player="${p}" data-rank="3">3位</button>
+            ` : ''}
+            ${(!p.startsWith("NPC") && p !== "（未定）") ? `
+              <button class="host-btn ${hostClass}" data-host-key="${matchKey}" data-player="${p}">
+                ${hostLabel}
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <div class="match-card ${isMatchSearch ? 'search-match' : ''}">
+        <div class="match-num">${title}</div>
+        ${playersHTML}
+      </div>
+    `;
+  }
+
+  function renderTree() {
+    const wrapper = document.getElementById("tree-wrapper");
+    wrapper.innerHTML = "";
+
+    const players = tournamentData.players;
+    if (!players || players.length === 0) return;
+
+    let roundSlots = [];
+    roundSlots[0] = [...players];
+
+    let r = 0;
+    while (roundSlots[r].length > 4) {
+      const prevSlots = roundSlots[r];
+      const matchCount = Math.ceil(prevSlots.length / 4);
+      let nextRoundSlots = [];
+
+      for (let m = 0; m < matchCount; m++) {
+        const matchKey = `${r}-${m}`;
+        const matchState = tournamentData.matches[matchKey] || { winners: [] };
+        const winners = matchState.winners || [];
+        
+        nextRoundSlots.push(winners[0] || "（未定）");
+        nextRoundSlots.push(winners[1] || "（未定）");
+      }
+      roundSlots[r + 1] = nextRoundSlots;
+      r++;
+    }
+    const totalRounds = r + 1;
+
+    if (tournamentData.selectedRound === "all") {
+      const scrollWrapper = document.createElement("div");
+      scrollWrapper.className = "tree-scroll-wrapper";
+
+      const treeContainer = document.createElement("div");
+      treeContainer.className = "tournament-tree-full";
+
+      for (let roundIdx = 0; roundIdx < totalRounds; roundIdx++) {
+        const col = document.createElement("div");
+        col.className = "round-column-full";
+        col.innerHTML = `<div class="round-header">${getRoundName(roundIdx, totalRounds)}</div>`;
+
+        const slots = roundSlots[roundIdx];
+        const isFinal = (roundIdx === totalRounds - 1);
+        const matchCount = isFinal ? 1 : Math.ceil(slots.length / 4);
+
+        for (let m = 0; m < matchCount; m++) {
+          const matchPlayers = slots.slice(m * 4, m * 4 + 4);
+          while (matchPlayers.length < 4 && !isFinal) matchPlayers.push("（未定）");
+
+          const matchKey = `${roundIdx}-${m}`;
+          const title = isFinal ? "決勝卓" : `第 ${m + 1} 卓`;
+
+          const matchGroup = document.createElement("div");
+          matchGroup.className = "match-group";
+          matchGroup.innerHTML = createMatchCardHTML(matchPlayers, matchKey, title, isFinal);
+          col.appendChild(matchGroup);
+        }
+        treeContainer.appendChild(col);
+      }
+      scrollWrapper.appendChild(treeContainer);
+      wrapper.appendChild(scrollWrapper);
+
+    } else {
+      const roundIdx = tournamentData.selectedRound;
+      const isFinal = (roundIdx === totalRounds - 1);
+
+      const header = document.createElement("div");
+      header.className = "round-header";
+      header.style.marginBottom = "20px";
+      header.textContent = getRoundName(roundIdx, totalRounds);
+      wrapper.appendChild(header);
+
+      const gridContainer = document.createElement("div");
+      gridContainer.className = "single-round-grid";
+
+      const slots = roundSlots[roundIdx];
+      const matchCount = isFinal ? 1 : Math.ceil(slots.length / 4);
+
+      for (let m = 0; m < matchCount; m++) {
+        const matchPlayers = slots.slice(m * 4, m * 4 + 4);
+        while (matchPlayers.length < 4 && !isFinal) matchPlayers.push("（未定）");
+
+        const matchKey = `${roundIdx}-${m}`;
+        const title = isFinal ? "決勝卓" : `第 ${m + 1} 卓`;
+        gridContainer.innerHTML += createMatchCardHTML(matchPlayers, matchKey, title, isFinal);
+      }
+      wrapper.appendChild(gridContainer);
+    }
+
+    // イベントリスナー（勝ち抜け選択）
+    wrapper.querySelectorAll(".player-slot").forEach(slot => {
+      slot.addEventListener("click", (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        const key = slot.getAttribute("data-key");
+        const player = slot.getAttribute("data-player");
+        if (player === "（未定）") return;
+
+        if (!tournamentData.matches[key]) tournamentData.matches[key] = { winners: [], mainHost: null, subHost: null, ranks: {} };
+        let winners = tournamentData.matches[key].winners || [];
+
+        if (winners.includes(player)) {
+          winners = winners.filter(w => w !== player);
+        } else {
+          if (winners.length >= 2) {
+            alert("1つの卓から勝ち抜けるのは最大2名までです。");
+            return;
+          }
+          winners.push(player);
+        }
+        tournamentData.matches[key].winners = winners;
+        saveData();
+      });
+    });
+
+    // 部屋主切り替え（なし -> 主 -> 副 -> なし）
+    wrapper.querySelectorAll(".host-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const key = btn.getAttribute("data-host-key");
+        const player = btn.getAttribute("data-player");
+
+        if (!tournamentData.matches[key]) tournamentData.matches[key] = { winners: [], mainHost: null, subHost: null, ranks: {} };
+        const matchState = tournamentData.matches[key];
+
+        if (matchState.mainHost === player) {
+          matchState.mainHost = null;
+          matchState.subHost = player;
+        } else if (matchState.subHost === player) {
+          matchState.subHost = null;
+        } else {
+          matchState.mainHost = player;
+          if (matchState.subHost === player) matchState.subHost = null;
+        }
+        saveData();
+      });
+    });
+
+    // 順位設定（1位/2位/3位）
+    wrapper.querySelectorAll(".rank-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const key = btn.getAttribute("data-rank-key");
+        const player = btn.getAttribute("data-player");
+        const rank = btn.getAttribute("data-rank");
+
+        if (!tournamentData.matches[key]) tournamentData.matches[key] = { winners: [], mainHost: null, subHost: null, ranks: {} };
+        if (!tournamentData.matches[key].ranks) tournamentData.matches[key].ranks = {};
+
+        if (tournamentData.matches[key].ranks[player] === rank) {
+          delete tournamentData.matches[key].ranks[player];
+        } else {
+          tournamentData.matches[key].ranks[player] = rank;
+        }
+        saveData();
+      });
+    });
+  }
+</script>
+</body>
+</html>
