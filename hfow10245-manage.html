@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
   <script>
-    // ログインセッションチェック
     if (sessionStorage.getItem("admin_authenticated") !== "true") {
       alert("ログインが必要です。");
       window.location.href = "admin.html";
@@ -20,7 +19,7 @@
       background-color: #f3ead5;
       background-image: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(80, 60, 40, 0.025) 4px);
     }
-    .container { width: min(1000px, 94%); margin: 0 auto; padding: 35px 0 60px; }
+    .container { width: min(1200px, 94%); margin: 0 auto; padding: 35px 0 60px; }
     header { text-align: center; margin-bottom: 35px; }
     .small-title { font-size: 13px; letter-spacing: 0.25em; color: #6d6255; margin-bottom: 10px; }
     h1 { margin: 0; font-size: clamp(28px, 6vw, 42px); font-weight: normal; letter-spacing: 0.15em; color: #263d52; }
@@ -34,18 +33,16 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
     .panel-title {
-      margin: 0 0 20px;
-      padding-bottom: 10px;
+      margin: 0 0 20px; padding-bottom: 10px;
       border-bottom: 1px solid #b9ad99;
       font-size: 20px; font-weight: normal; color: #263d52; letter-spacing: 0.12em;
     }
     .form-row { margin-bottom: 20px; }
     label { display: block; margin-bottom: 8px; font-size: 13px; color: #5e554c; letter-spacing: 0.08em; }
-    textarea, input[type="text"] {
-      width: 100%; padding: 12px; border: 1px solid #aaa08f; background: #fffdf5;
-      font-family: inherit; font-size: 14px; color: #2b2926; outline: none;
+    textarea {
+      width: 100%; height: 120px; padding: 12px; border: 1px solid #aaa08f; background: #fffdf5;
+      font-family: inherit; font-size: 14px; color: #2b2926; outline: none; resize: vertical; line-height: 1.6;
     }
-    textarea { height: 120px; resize: vertical; line-height: 1.6; }
     .notice {
       padding: 12px 14px; margin-top: 8px; background: rgba(38, 61, 82, 0.06);
       border-left: 3px solid #263d52; font-size: 12px; line-height: 1.6; color: #5e554c;
@@ -60,19 +57,23 @@
     .danger-btn { background: #8d302b; }
     .danger-btn:hover { background: #a33a32; }
 
-    /* トーナメント表示タブ＆フィルター */
-    .view-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #a99b83; padding-bottom: 10px; }
-    .tab-btn { background: rgba(255,252,241,0.6); border: 1px solid #a99b83; color: #2b2926; padding: 8px 18px; cursor: pointer; font-size: 13px; }
+    /* 回戦切り替えタブ */
+    .view-tabs {
+      display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #a99b83; padding-bottom: 10px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+    }
+    .tab-btn {
+      background: rgba(255,252,241,0.8); border: 1px solid #a99b83; color: #2b2926;
+      padding: 8px 16px; cursor: pointer; font-size: 13px; white-space: nowrap; flex-shrink: 0;
+    }
     .tab-btn.active { background: #263d52; color: #fffaf0; border-color: #263d52; }
 
-    /* トーナメントツリーデザイン */
-    .tournament-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+    /* トーナメント表示 */
+    .tournament-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
     .round-box { background: rgba(255, 255, 255, 0.5); padding: 15px; border: 1px solid #c8bead; }
     .round-title { font-size: 16px; color: #263d52; border-bottom: 2px solid #263d52; padding-bottom: 5px; margin-bottom: 15px; text-align: center; }
 
-    .match-card {
-      background: #fffdf5; border: 1px solid #aaa08f; margin-bottom: 15px; padding: 10px; position: relative;
-    }
+    .match-card { background: #fffdf5; border: 1px solid #aaa08f; margin-bottom: 15px; padding: 10px; }
     .match-num { font-size: 11px; color: #756b5f; margin-bottom: 5px; }
 
     .player-slot {
@@ -81,17 +82,13 @@
       cursor: pointer; user-select: none; transition: 0.2s;
     }
     .player-slot:hover { background: #fdfaf0; }
-    .player-slot.winner {
-      border-color: #a33a32; background: #fdf2f0; color: #a33a32; font-weight: bold;
-    }
-    .player-slot.winner::after {
-      content: "★ 勝利"; font-size: 11px; margin-left: 8px; color: #a33a32;
-    }
-    .player-name { flex: 1; }
+    .player-slot.winner { border-color: #a33a32; background: #fdf2f0; color: #a33a32; font-weight: bold; }
+    .player-slot.winner::after { content: "★ 勝利"; font-size: 11px; margin-left: 8px; color: #a33a32; }
+    .player-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .host-btn {
       font-size: 11px; padding: 2px 6px; border: 1px solid #aaa08f; background: #fdfaef;
-      cursor: pointer; margin-left: 8px; color: #5e554c;
+      cursor: pointer; margin-left: 8px; color: #5e554c; flex-shrink: 0;
     }
     .host-btn.active { background: #263d52; color: #fff; border-color: #263d52; }
 
@@ -107,43 +104,30 @@
     <div class="line"></div>
   </header>
 
-  <!-- 作成フォーム -->
   <section class="panel">
     <h2 class="panel-title">トーナメント枠 手動生成</h2>
-
     <div class="form-row">
       <label for="player-list">初戦回順・対戦カード順（1行に1名または1組記入）</label>
-      <textarea id="player-list" placeholder="例：
-織田信長
-豊臣秀吉
-徳川家康
-（シード）
-武田信玄
-上杉謙信"></textarea>
+      <textarea id="player-list" placeholder="例：&#10;織田信長&#10;豊臣秀吉&#10;徳川家康&#10;（シード）"></textarea>
       <div class="notice">
-        ※上から順番に「1試合目対戦者1」「1試合目対戦者2」「2試合目対戦者1」…の順でトーナメント枠に割り当てられます。<br>
-        ※シード枠（不戦勝）にする場合は「（シード）」または「BYE」と入力してください。
+        ※上から順に1試合目の対戦1・対戦2、2試合目の対戦1…と配置されます。<br>
+        ※シード枠は「（シード）」または「BYE」とご入力ください。
       </div>
     </div>
-
     <div class="button-area">
       <button onclick="generateTournament()">入力内容でトーナメント表を作成</button>
       <button class="danger-btn" onclick="clearTournament()">全データをリセット</button>
     </div>
   </section>
 
-  <!-- 運営・対戦表領域 -->
   <section class="panel" id="manage-area" style="display:none;">
     <h2 class="panel-title">対戦結果の入力・部屋主設定</h2>
     <div class="notice" style="margin-bottom: 20px;">
-      💡 <strong>操作方法:</strong> 勝利させたいプレイヤー枠をタップ/クリックすると勝者として記録され、赤く強調されます。もう一度タップすると勝利をキャンセルできます。
+      💡 枠をタップして勝利状態のオン/オフを切り替えます。
     </div>
 
-    <!-- 切り替えタブ -->
-    <div class="view-tabs">
-      <button class="tab-btn active" onclick="switchView('all')">全体トーナメント表</button>
-      <button class="tab-btn" onclick="switchView('late')">後半戦（ベスト8以降 / 3回戦〜）</button>
-    </div>
+    <!-- 回戦タブコンテナ -->
+    <div class="view-tabs" id="tab-container"></div>
 
     <div id="tournament-tree" class="tournament-grid"></div>
   </section>
@@ -155,11 +139,10 @@
 const STORAGE_KEY = "owari_hanafuda_tournament_data";
 let tournamentData = {
   players: [],
-  matches: {}, // round-matchIdx -> { winner: null, host: null }
-  currentView: "all"
+  matches: {},
+  selectedRound: "all" // 'all' または ラウンドインデックス(0, 1, 2...)
 };
 
-// ページ読み込み時
 window.addEventListener("DOMContentLoaded", () => {
   loadData();
 });
@@ -171,6 +154,7 @@ function loadData() {
     if (tournamentData.players && tournamentData.players.length > 0) {
       document.getElementById("player-list").value = tournamentData.players.join("\n");
       document.getElementById("manage-area").style.display = "block";
+      renderTabs();
       renderTree();
     }
   }
@@ -182,57 +166,70 @@ function saveData() {
 
 function generateTournament() {
   const rawText = document.getElementById("player-list").value.trim();
-  if (!rawText) {
-    alert("参加者の並びを入力してください。");
-    return;
-  }
+  if (!rawText) return alert("参加者の並びを入力してください。");
 
   const list = rawText.split("\n").map(s => s.trim()).filter(s => s !== "");
-  if (list.length < 2) {
-    alert("最低2名以上のリストを入力してください。");
-    return;
-  }
+  if (list.length < 2) return alert("最低2名以上のリストを入力してください。");
 
-  if (confirm("現在の勝敗記録をリセットしてトーナメント表を新規生成しますか？")) {
+  if (confirm("対戦結果をリセットして再生成しますか？")) {
     tournamentData.players = list;
     tournamentData.matches = {};
+    tournamentData.selectedRound = "all";
     saveData();
     document.getElementById("manage-area").style.display = "block";
+    renderTabs();
     renderTree();
   }
 }
 
 function clearTournament() {
-  if (confirm("大会データを完全に消去しますか？（閲覧用ページ側も白紙になります）")) {
+  if (confirm("全データを消去しますか？")) {
     localStorage.removeItem(STORAGE_KEY);
-    tournamentData = { players: [], matches: {}, currentView: "all" };
+    tournamentData = { players: [], matches: {}, selectedRound: "all" };
     document.getElementById("player-list").value = "";
     document.getElementById("manage-area").style.display = "none";
   }
 }
 
-function switchView(viewMode) {
-  tournamentData.currentView = viewMode;
-  const tabs = document.querySelectorAll(".tab-btn");
-  tabs[0].classList.toggle("active", viewMode === 'all');
-  tabs[1].classList.toggle("active", viewMode === 'late');
+function getRoundName(r, totalRounds) {
+  const remaining = totalRounds - r;
+  if (remaining === 1) return "決勝戦";
+  if (remaining === 2) return "準決勝";
+  if (remaining === 3) return "準々決勝";
+  return `${r + 1}回戦`;
+}
+
+function renderTabs() {
+  const tabContainer = document.getElementById("tab-container");
+  const totalRounds = Math.ceil(Math.log2(tournamentData.players.length));
+  
+  let html = `<button class="tab-btn ${tournamentData.selectedRound === 'all' ? 'active' : ''}" onclick="selectRound('all')">全回戦表示</button>`;
+  
+  for (let r = 0; r < totalRounds; r++) {
+    const name = getRoundName(r, totalRounds);
+    const active = tournamentData.selectedRound === r ? 'active' : '';
+    html += `<button class="tab-btn ${active}" onclick="selectRound(${r})">${name}</button>`;
+  }
+  
+  tabContainer.innerHTML = html;
+}
+
+function selectRound(r) {
+  tournamentData.selectedRound = r;
+  renderTabs();
   renderTree();
 }
 
-// トーナメントツリー描画
 function renderTree() {
   const treeContainer = document.getElementById("tournament-tree");
   treeContainer.innerHTML = "";
 
   const players = tournamentData.players;
-  // 1回戦の試合数
   const totalRounds = Math.ceil(Math.log2(players.length));
   
-  // ラウンドごとに組み合わせを計算
   let roundSlots = [];
   roundSlots[0] = [...players];
 
-  // 次のラウンド以降の進出者リストを計算
   for (let r = 1; r < totalRounds; r++) {
     const prevSlots = roundSlots[r - 1];
     const nextCount = Math.ceil(prevSlots.length / 2);
@@ -246,23 +243,15 @@ function renderTree() {
     roundSlots[r] = currentRoundSlots;
   }
 
-  // 表示対象のラウンド判定（前半/後半フィルター）
-  let startRound = 0;
-  if (tournamentData.currentView === 'late' && totalRounds > 2) {
-    startRound = totalRounds - 2; // ラスト2〜3ラウンド（準々決勝/準決勝〜）
-  }
+  for (let r = 0; r < totalRounds; r++) {
+    // タブ選択による絞り込み
+    if (tournamentData.selectedRound !== "all" && tournamentData.selectedRound !== r) {
+      continue;
+    }
 
-  for (let r = startRound; r < totalRounds; r++) {
     const roundBox = document.createElement("div");
     roundBox.className = "round-box";
-
-    const remaining = totalRounds - r;
-    let roundName = `${r + 1}回戦`;
-    if (remaining === 1) roundName = "決勝戦";
-    else if (remaining === 2) roundName = "準決勝";
-    else if (remaining === 3) roundName = "準々決勝";
-
-    roundBox.innerHTML = `<div class="round-title">${roundName}</div>`;
+    roundBox.innerHTML = `<div class="round-title">${getRoundName(r, totalRounds)}</div>`;
 
     const slots = roundSlots[r];
     const matchCount = Math.ceil(slots.length / 2);
@@ -312,37 +301,27 @@ function renderTree() {
   }
 }
 
-// 勝利の切り替え（トグル）
 function toggleWinner(matchKey, player) {
   if (player === "（未定）" || player === "（なし）" || player.includes("シード") || player.includes("BYE")) return;
+  if (!tournamentData.matches[matchKey]) tournamentData.matches[matchKey] = { winner: null, host: null };
 
-  if (!tournamentData.matches[matchKey]) {
-    tournamentData.matches[matchKey] = { winner: null, host: null };
-  }
-
-  // すでに勝者ならキャンセル、違えば勝利登録
   if (tournamentData.matches[matchKey].winner === player) {
     tournamentData.matches[matchKey].winner = null;
   } else {
     tournamentData.matches[matchKey].winner = player;
   }
-
   saveData();
   renderTree();
 }
 
-// 部屋主の設定
 function setHost(matchKey, player) {
-  if (!tournamentData.matches[matchKey]) {
-    tournamentData.matches[matchKey] = { winner: null, host: null };
-  }
+  if (!tournamentData.matches[matchKey]) tournamentData.matches[matchKey] = { winner: null, host: null };
 
   if (tournamentData.matches[matchKey].host === player) {
     tournamentData.matches[matchKey].host = null;
   } else {
     tournamentData.matches[matchKey].host = player;
   }
-
   saveData();
   renderTree();
 }
