@@ -180,7 +180,7 @@
     >
 
     <button onclick="login()">
-      入　場
+      入 場
     </button>
 
     <div id="error" class="error">
@@ -193,35 +193,35 @@
 
   </main>
 
-
   <script>
-    function login() {
+    // 「owari-10245」をSHA-256でハッシュ化した値
+    const targetHash = "2d0c2423bb0d9703664d6db5cfb6e9a65d3ea94d6e1be485ee4bf0fa1d8e13f2";
 
-      const password =
-        document.getElementById("password").value;
+    async function hashPassword(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
 
-      const correctPassword =
-        "owari-10245";
+    async function login() {
+      const inputPass = document.getElementById("password").value;
+      const inputHash = await hashPassword(inputPass);
 
-      if (password === correctPassword) {
-
-        window.location.href = "admin-panow10el245";
-
+      if (inputHash === targetHash) {
+        // 認証フラグを保存
+        sessionStorage.setItem("admin_authenticated", "true");
+        // 管理画面へ遷移
+        window.location.href = "admin-panow10el245.html";
       } else {
-
         document.getElementById("error").style.display = "block";
-
       }
     }
 
     document
       .getElementById("password")
       .addEventListener("keydown", function(event) {
-
         if (event.key === "Enter") {
           login();
         }
-
       });
   </script>
 
