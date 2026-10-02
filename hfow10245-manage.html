@@ -53,7 +53,6 @@
     .danger-btn { background: #8d302b; }
     .danger-btn:hover { background: #a33a32; }
 
-    /* 検索ボックス */
     .search-box {
       margin-bottom: 20px; display: flex; align-items: center; gap: 10px; background: #fffdf5;
       padding: 10px 15px; border: 1px solid #a99b83;
@@ -63,7 +62,6 @@
       flex: 1; padding: 8px 12px; border: 1px solid #aaa08f; font-family: inherit; font-size: 14px; outline: none;
     }
 
-    /* 回戦タブ */
     .view-tabs {
       display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #a99b83; padding-bottom: 10px;
       overflow-x: auto; -webkit-overflow-scrolling: touch;
@@ -74,7 +72,6 @@
     }
     .tab-btn.active { background: #263d52; color: #fffaf0; border-color: #263d52; }
 
-    /* 全回戦用：横スクロール コの字ツリー */
     .tree-scroll-wrapper { overflow-x: auto; padding: 20px 0; }
     .tournament-tree-full { display: flex; align-items: stretch; min-width: max-content; }
     .round-column-full { display: flex; flex-direction: column; justify-content: space-around; width: 220px; margin-right: 30px; position: relative; }
@@ -91,21 +88,19 @@
     .round-column-full:last-child .match-group::after,
     .round-column-full:last-child .match-group::before { display: none; }
 
-    /* 単一回戦用：複数行折り返し（2〜3列グリッド） */
     .single-round-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; padding: 10px 0;
     }
 
     .match-card {
       background: #fffdf5; border: 1px solid #aaa08f; padding: 8px; position: relative; z-index: 2;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.05); transition: 0.2s;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.05); transition: 0.2s; margin-bottom: 10px;
     }
-    /* 検索ヒット時のハイライト */
     .match-card.search-match {
       border: 2px solid #a33a32; background: #fff5f3; box-shadow: 0 0 10px rgba(163, 58, 50, 0.3);
     }
 
-    .match-num { font-size: 11px; color: #756b5f; margin-bottom: 4px; text-align: center; }
+    .match-num { font-size: 11px; color: #756b5f; margin-bottom: 4px; text-align: center; font-weight: bold; }
     .player-slot {
       display: flex; align-items: center; justify-content: space-between;
       padding: 6px 8px; margin: 2px 0; border: 1px solid #e3dac8; background: #fff;
@@ -153,13 +148,11 @@
   <section class="panel" id="manage-area" style="display:none;">
     <h2 class="panel-title">対戦結果の入力・部屋主設定</h2>
     
-    <!-- 検索機能 -->
     <div class="search-box">
       <label for="search-input">🔍 選手検索:</label>
       <input type="text" id="search-input" placeholder="名前を入力すると対戦枠を強調表示します...">
     </div>
 
-    <!-- 回戦タブ -->
     <div class="view-tabs" id="tab-container"></div>
 
     <div id="tree-wrapper"></div>
@@ -271,6 +264,65 @@
     });
   }
 
+  function createMatchCardHTML(p1, p2, matchKey, title, query) {
+    const matchState = tournamentData.matches[matchKey] || { winner: null, host: null };
+    const isMatchSearch = query && (p1.toLowerCase().includes(query) || p2.toLowerCase().includes(query));
+
+    const isP1Winner = (matchState.winner === p1 && p1 !== "（未定）" && p1 !== "（なし）");
+    const isP2Winner = (matchState.winner === p2 && p2 !== "（未定）" && p2 !== "（なし）");
+
+    return `
+      <div class="match-card ${isMatchSearch ? 'search-match' : ''}">
+        <div class="match-num">${title}</div>
+        <div class="player-slot ${isP1Winner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p1}">
+          <span class="player-name">${p1}</span>
+          ${(p1 !== "（未定）" && p1 !== "（なし）" && p2 !== "（なし）") ? `
+            <button class="host-btn ${matchState.host === p1 ? 'active' : ''}" data-host-key="${matchKey}" data-host-player="${p1}">
+              ${matchState.host === p1 ? '◎ 部屋主' : '部屋主'}
+            </button>
+          ` : ''}
+        </div>
+        <div class="player-slot ${isP2Winner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p2}">
+          <span class="player-name">${p2}</span>
+          ${(p2 !== "（未定）" && p2 !== "（なし）" && p1 !== "（なし）") ? `
+            <button class="host-btn ${matchState.host === p2 ? 'active' : ''}" data-host-key="${matchKey}" data-host-player="${p2}">
+              ${matchState.host === p2 ? '◎ 部屋主' : '部屋主'}
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  function get3rdPlacePlayers(roundSlots, totalRounds) {
+    if (totalRounds < 2) return ["（未定）", "（未定）"];
+    const semiRound = totalRounds - 2;
+    const semiSlots = roundSlots[semiRound];
+    
+    let p1_loser = "（未定）";
+    let p2_loser = "（未定）";
+
+    const m1_key = `${semiRound}-0`;
+    const m1_p1 = semiSlots[0] || "（なし）";
+    const m1_p2 = semiSlots[1] || "（なし）";
+    const m1_winner = (tournamentData.matches[m1_key] || {}).winner;
+    if (m1_winner) {
+      if (m1_winner === m1_p1) p1_loser = m1_p2;
+      else if (m1_winner === m1_p2) p1_loser = m1_p1;
+    }
+
+    const m2_key = `${semiRound}-1`;
+    const m2_p1 = semiSlots[2] || "（なし）";
+    const m2_p2 = semiSlots[3] || "（なし）";
+    const m2_winner = (tournamentData.matches[m2_key] || {}).winner;
+    if (m2_winner) {
+      if (m2_winner === m2_p1) p2_loser = m2_p2;
+      else if (m2_winner === m2_p2) p2_loser = m2_p1;
+    }
+
+    return [p1_loser, p2_loser];
+  }
+
   function renderTree() {
     const wrapper = document.getElementById("tree-wrapper");
     wrapper.innerHTML = "";
@@ -297,7 +349,7 @@
 
     const query = tournamentData.searchQuery;
 
-    // A. 全回戦表示（コの字ツリー・横スクロール）
+    // A. 全回戦表示
     if (tournamentData.selectedRound === "all") {
       const scrollWrapper = document.createElement("div");
       scrollWrapper.className = "tree-scroll-wrapper";
@@ -317,52 +369,30 @@
           const p1 = slots[m * 2] || "（なし）";
           const p2 = slots[m * 2 + 1] || "（なし）";
           const matchKey = `${r}-${m}`;
-          const matchState = tournamentData.matches[matchKey] || { winner: null, host: null };
-
-          const isMatchSearch = query && (p1.toLowerCase().includes(query) || p2.toLowerCase().includes(query));
 
           const matchGroup = document.createElement("div");
           matchGroup.className = "match-group";
-
-          const matchCard = document.createElement("div");
-          matchCard.className = `match-card ${isMatchSearch ? 'search-match' : ''}`;
-
-          let html = `<div class="match-num">第 ${m + 1} 試合</div>`;
-          const isP1Winner = (matchState.winner === p1 && p1 !== "（未定）" && p1 !== "（なし）");
-          html += `
-            <div class="player-slot ${isP1Winner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p1}">
-              <span class="player-name">${p1}</span>
-              ${(p1 !== "（未定）" && p1 !== "（なし）" && p2 !== "（なし）") ? `
-                <button class="host-btn ${matchState.host === p1 ? 'active' : ''}" data-host-key="${matchKey}" data-host-player="${p1}">
-                  ${matchState.host === p1 ? '◎ 部屋主' : '部屋主'}
-                </button>
-              ` : ''}
-            </div>
-          `;
-
-          const isP2Winner = (matchState.winner === p2 && p2 !== "（未定）" && p2 !== "（なし）");
-          html += `
-            <div class="player-slot ${isP2Winner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p2}">
-              <span class="player-name">${p2}</span>
-              ${(p2 !== "（未定）" && p2 !== "（なし）" && p1 !== "（なし）") ? `
-                <button class="host-btn ${matchState.host === p2 ? 'active' : ''}" data-host-key="${matchKey}" data-host-player="${p2}">
-                  ${matchState.host === p2 ? '◎ 部屋主' : '部屋主'}
-                </button>
-              ` : ''}
-            </div>
-          `;
-
-          matchCard.innerHTML = html;
-          matchGroup.appendChild(matchCard);
+          matchGroup.innerHTML = createMatchCardHTML(p1, p2, matchKey, `第 ${m + 1} 試合`, query);
           col.appendChild(matchGroup);
         }
+
+        // 決勝戦カラムに3位決定戦を追加
+        if (r === totalRounds - 1 && totalRounds >= 2) {
+          const [p3_1, p3_2] = get3rdPlacePlayers(roundSlots, totalRounds);
+          const thirdMatchGroup = document.createElement("div");
+          thirdMatchGroup.className = "match-group";
+          thirdMatchGroup.style.marginTop = "30px";
+          thirdMatchGroup.innerHTML = createMatchCardHTML(p3_1, p3_2, "3rd-place", "3位決定戦", query);
+          col.appendChild(thirdMatchGroup);
+        }
+
         treeContainer.appendChild(col);
       }
       scrollWrapper.appendChild(treeContainer);
       wrapper.appendChild(scrollWrapper);
 
     } else {
-      // B. 単一回戦表示（複数行・2〜3列折り返しグリッド）
+      // B. 単一回戦表示
       const r = tournamentData.selectedRound;
       const header = document.createElement("div");
       header.className = "round-header";
@@ -380,41 +410,15 @@
         const p1 = slots[m * 2] || "（なし）";
         const p2 = slots[m * 2 + 1] || "（なし）";
         const matchKey = `${r}-${m}`;
-        const matchState = tournamentData.matches[matchKey] || { winner: null, host: null };
-
-        const isMatchSearch = query && (p1.toLowerCase().includes(query) || p2.toLowerCase().includes(query));
-
-        const matchCard = document.createElement("div");
-        matchCard.className = `match-card ${isMatchSearch ? 'search-match' : ''}`;
-
-        let html = `<div class="match-num">第 ${m + 1} 試合</div>`;
-        const isP1Winner = (matchState.winner === p1 && p1 !== "（未定）" && p1 !== "（なし）");
-        html += `
-          <div class="player-slot ${isP1Winner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p1}">
-            <span class="player-name">${p1}</span>
-            ${(p1 !== "（未定）" && p1 !== "（なし）" && p2 !== "（なし）") ? `
-              <button class="host-btn ${matchState.host === p1 ? 'active' : ''}" data-host-key="${matchKey}" data-host-player="${p1}">
-                ${matchState.host === p1 ? '◎ 部屋主' : '部屋主'}
-              </button>
-            ` : ''}
-          </div>
-        `;
-
-        const isP2Winner = (matchState.winner === p2 && p2 !== "（未定）" && p2 !== "（なし）");
-        html += `
-          <div class="player-slot ${isP2Winner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p2}">
-            <span class="player-name">${p2}</span>
-            ${(p2 !== "（未定）" && p2 !== "（なし）" && p1 !== "（なし）") ? `
-              <button class="host-btn ${matchState.host === p2 ? 'active' : ''}" data-host-key="${matchKey}" data-host-player="${p2}">
-                ${matchState.host === p2 ? '◎ 部屋主' : '部屋主'}
-              </button>
-            ` : ''}
-          </div>
-        `;
-
-        matchCard.innerHTML = html;
-        gridContainer.appendChild(matchCard);
+        gridContainer.innerHTML += createMatchCardHTML(p1, p2, matchKey, `第 ${m + 1} 試合`, query);
       }
+
+      // 決勝戦タブ選択時に3位決定戦を表示
+      if (r === totalRounds - 1 && totalRounds >= 2) {
+        const [p3_1, p3_2] = get3rdPlacePlayers(roundSlots, totalRounds);
+        gridContainer.innerHTML += createMatchCardHTML(p3_1, p3_2, "3rd-place", "3位決定戦", query);
+      }
+
       wrapper.appendChild(gridContainer);
     }
 
