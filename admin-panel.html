@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>大会運営｜尾張藩大会</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+
+      font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        "Noto Serif JP",
+        serif;
+
+      color: #2b2926;
+
+      background-color: #f3ead5;
+
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 3px,
+          rgba(80, 60, 40, 0.025) 4px
+        );
+    }
+
+    .container {
+      width: min(900px, 92%);
+      margin: 0 auto;
+      padding: 35px 0 60px;
+    }
+
+    /* ヘッダー */
+
+    header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .small-title {
+      font-size: 13px;
+      letter-spacing: 0.25em;
+      color: #6d6255;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+
+      font-size: clamp(28px, 6vw, 42px);
+      font-weight: normal;
+
+      letter-spacing: 0.15em;
+      color: #263d52;
+    }
+
+    .line {
+      width: 100px;
+      height: 2px;
+
+      margin: 18px auto;
+
+      background: #a33a32;
+    }
+
+    .description {
+      margin: 0;
+
+      color: #756b5f;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+    }
+
+    /* 共通カード */
+
+    .panel {
+      margin-bottom: 25px;
+      padding: 25px;
+
+      background: rgba(255, 252, 241, 0.78);
+
+      border: 1px solid #a99b83;
+    }
+
+    .panel-title {
+      margin: 0 0 20px;
+
+      padding-bottom: 10px;
+
+      border-bottom: 1px solid #b9ad99;
+
+      font-size: 20px;
+      font-weight: normal;
+
+      color: #263d52;
+      letter-spacing: 0.12em;
+    }
+
+    /* フォーム */
+
+    .form-row {
+      margin-bottom: 20px;
+    }
+
+    .form-row:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+
+      margin-bottom: 8px;
+
+      font-size: 13px;
+      color: #5e554c;
+
+      letter-spacing: 0.08em;
+    }
+
+    select,
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+
+      padding: 12px;
+
+      border: 1px solid #aaa08f;
+
+      background: #fffdf5;
+
+      font-family: inherit;
+      font-size: 15px;
+
+      color: #2b2926;
+
+      outline: none;
+    }
+
+    select:focus,
+    input:focus {
+      border-color: #263d52;
+    }
+
+    .number-input {
+      max-width: 220px;
+    }
+
+    /* 説明 */
+
+    .notice {
+      padding: 14px 16px;
+
+      margin-top: 15px;
+
+      background: rgba(38, 61, 82, 0.06);
+
+      border-left: 3px solid #263d52;
+
+      font-size: 13px;
+
+      line-height: 1.8;
+      color: #5e554c;
+    }
+
+    /* ボタン */
+
+    .button-area {
+      text-align: center;
+
+      margin-top: 30px;
+    }
+
+    button {
+      padding: 14px 45px;
+
+      border: none;
+
+      background: #263d52;
+      color: #fffaf0;
+
+      font-family: inherit;
+      font-size: 15px;
+
+      letter-spacing: 0.15em;
+
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #314e67;
+    }
+
+    /* 参加者入力 */
+
+    #participant-area {
+      display: none;
+    }
+
+    .participant-group {
+      margin-bottom: 30px;
+    }
+
+    .participant-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .participant-title {
+      margin-bottom: 15px;
+
+      color: #a33a32;
+
+      font-size: 16px;
+      letter-spacing: 0.1em;
+    }
+
+    .participant-list {
+      display: grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap: 10px;
+    }
+
+    .participant-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .participant-number {
+      width: 30px;
+
+      text-align: right;
+
+      color: #756b5f;
+      font-size: 13px;
+    }
+
+    .participant-item input {
+      flex: 1;
+    }
+
+    /* トップへ */
+
+    .back {
+      display: block;
+
+      margin-top: 30px;
+
+      text-align: center;
+
+      color: #756b5f;
+
+      text-decoration: none;
+
+      font-size: 12px;
+
+      letter-spacing: 0.1em;
+    }
+
+    .back:hover {
+      color: #263d52;
+    }
+
+    /* スマホ */
+
+    @media (max-width: 600px) {
+
+      .container {
+        padding-top: 25px;
+      }
+
+      .panel {
+        padding: 20px 16px;
+      }
+
+      .participant-list {
+        grid-template-columns: 1fr;
+      }
+
+      .number-input {
+        max-width: none;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="container">
+
+    <!-- ヘッダー -->
+
+    <header>
+
+      <div class="small-title">
+        尾張藩主催
+      </div>
+
+      <h1>
+        大会運営
+      </h1>
+
+      <div class="line"></div>
+
+      <p class="description">
+        大会設定・参加者登録
+      </p>
+
+    </header>
+
+
+    <!-- 大会設定 -->
+
+    <section class="panel">
+
+      <h2 class="panel-title">
+        大会設定
+      </h2>
+
+
+      <!-- 種目 -->
+
+      <div class="form-row">
+
+        <label for="game">
+          大会種目
+        </label>
+
+        <select id="game">
+
+          <option value="">
+            選択してください
+          </option>
+
+          <option value="hanafuda">
+            花札
+          </option>
+
+          <option value="mahjong">
+            麻雀
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- 参加人数 -->
+
+      <div class="form-row">
+
+        <label for="players">
+          参加人数
+        </label>
+
+        <input
+          type="number"
+          id="players"
+          class="number-input"
+          min="2"
+          max="256"
+          placeholder="例：32"
+        >
+
+        <div class="notice">
+          参加人数を入力すると、必要なシード数と参加者入力欄を自動で作成します。
+        </div>
+
+      </div>
+
+
+      <!-- シード人数 -->
+
+      <div class="form-row">
+
+        <label for="seeds">
+          シード人数
+        </label>
+
+        <input
+          type="number"
+          id="seeds"
+          class="number-input"
+          min="0"
+          max="256"
+          value="0"
+        >
+
+        <div class="notice">
+          シード人数は運営側で自由に設定できます。
+        </div>
+
+      </div>
+
+
+      <!-- 参加者入力生成 -->
+
+      <div class="button-area">
+
+        <button onclick="createParticipants()">
+          参加者入力欄を作成
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- 参加者 -->
+
+    <section
+      class="panel"
+      id="participant-area"
+    >
+
+      <h2 class="panel-title">
+        参加者登録
+      </h2>
+
+
+      <!-- シード -->
+
+      <div
+        class="participant-group"
+        id="seed-group"
+      >
+
+        <div class="participant-title">
+          ◆ シード参加者
+        </div>
+
+        <div
+          class="participant-list"
+          id="seed-list"
+        ></div>
+
+      </div>
+
+
+      <!-- 一般参加者 -->
+
+      <div
+        class="participant-group"
+        id="normal-group"
+      >
+
+        <div class="participant-title">
+          ◆ シード以外の参加者
+        </div>
+
+        <div
+          class="participant-list"
+          id="normal-list"
+        ></div>
+
+      </div>
+
+
+      <!-- 大会表作成 -->
+
+      <div class="button-area">
+
+        <button onclick="createTournament()">
+          大会表を作成
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <a
+      href="index.html"
+      class="back"
+    >
+      ← 大会トップへ戻る
+    </a>
+
+  </main>
+
+
+  <script>
+
+    function createParticipants() {
+
+      const players =
+        Number(
+          document.getElementById("players").value
+        );
+
+      const seeds =
+        Number(
+          document.getElementById("seeds").value
+        );
+
+
+      /* 入力チェック */
+
+      if (players < 2) {
+
+        alert("参加人数を2人以上で入力してください。");
+
+        return;
+      }
+
+
+      if (seeds < 0 || seeds > players) {
+
+        alert("シード人数を正しく入力してください。");
+
+        return;
+      }
+
+
+      /* シード欄 */
+
+      const seedList =
+        document.getElementById("seed-list");
+
+      seedList.innerHTML = "";
+
+
+      for (let i = 1; i <= seeds; i++) {
+
+        const item =
+          document.createElement("div");
+
+        item.className =
+          "participant-item";
+
+        item.innerHTML = `
+          <span class="participant-number">
+            ${i}.
+          </span>
+
+          <input
+            type="text"
+            placeholder="シード${i}の名前"
+            data-type="seed"
+            data-number="${i}"
+          >
+        `;
+
+        seedList.appendChild(item);
+      }
+
+
+      /* 一般参加者欄 */
+
+      const normalCount =
+        players - seeds;
+
+      const normalList =
+        document.getElementById("normal-list");
+
+      normalList.innerHTML = "";
+
+
+      for (let i = 1; i <= normalCount; i++) {
+
+        const item =
+          document.createElement("div");
+
+        item.className =
+          "participant-item";
+
+        item.innerHTML = `
+          <span class="participant-number">
+            ${i}.
+          </span>
+
+          <input
+            type="text"
+            placeholder="参加者${i}の名前"
+            data-type="normal"
+            data-number="${i}"
+          >
+        `;
+
+        normalList.appendChild(item);
+      }
+
+
+      /* 表示 */
+
+      document.getElementById(
+        "participant-area"
+      ).style.display = "block";
+
+
+      /* 入力欄までスクロール */
+
+      document.getElementById(
+        "participant-area"
+      ).scrollIntoView({
+        behavior: "smooth"
+      });
+
+    }
+
+
+    function createTournament() {
+
+      const game =
+        document.getElementById("game").value;
+
+      const players =
+        Number(
+          document.getElementById("players").value
+        );
+
+
+      if (!game) {
+
+        alert("大会種目を選択してください。");
+
+        return;
+      }
+
+
+      if (!players) {
+
+        alert("参加人数を入力してください。");
+
+        return;
+      }
+
+
+      alert(
+        "大会表の生成機能は次の段階で追加します。"
+      );
+
+    }
+
+  </script>
+
+</body>
+</html>
