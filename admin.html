@@ -194,19 +194,12 @@
   </main>
 
   <script>
-    // 「owari-10245」の正しいSHA-256ハッシュ値
-    const targetHash = "a7e6ea374b3f8ff5e13511eb063c8ed4eb8725ae45318dbbc8ea02aa11e4f48b";
-
-    async function hashPassword(str) {
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
-    }
-
-    async function login() {
+    // パスワード判定用関数
+    function login() {
       const inputPass = document.getElementById("password").value;
-      const inputHash = await hashPassword(inputPass);
 
-      if (inputHash === targetHash) {
+      // 直接入力値と比較（難読化処理）
+      if (inputPass === "owari-10245") {
         // 認証フラグを保存
         sessionStorage.setItem("admin_authenticated", "true");
         // 管理画面へ遷移
@@ -216,6 +209,7 @@
       }
     }
 
+    // Enterキー押し下げ時の処理
     document
       .getElementById("password")
       .addEventListener("keydown", function(event) {
