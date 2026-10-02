@@ -13,7 +13,7 @@
       background-color: #f3ead5;
       background-image: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(80, 60, 40, 0.025) 4px);
     }
-    .container { width: min(1000px, 94%); margin: 0 auto; padding: 35px 0 60px; }
+    .container { width: min(1200px, 94%); margin: 0 auto; padding: 35px 0 60px; }
     header { text-align: center; margin-bottom: 35px; }
     .header-kamon { margin-bottom: 15px; }
     .header-kamon img {
@@ -31,8 +31,15 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
 
-    .view-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #a99b83; padding-bottom: 10px; }
-    .tab-btn { background: rgba(255,252,241,0.6); border: 1px solid #a99b83; color: #2b2926; padding: 8px 18px; cursor: pointer; font-size: 13px; }
+    /* 回戦切り替えタブ */
+    .view-tabs {
+      display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #a99b83; padding-bottom: 10px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+    }
+    .tab-btn {
+      background: rgba(255,252,241,0.8); border: 1px solid #a99b83; color: #2b2926;
+      padding: 8px 16px; cursor: pointer; font-size: 13px; white-space: nowrap; flex-shrink: 0;
+    }
     .tab-btn.active { background: #263d52; color: #fffaf0; border-color: #263d52; }
 
     .tournament-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
@@ -51,8 +58,13 @@
     }
     .player-slot.winner::after { content: "★ 勝利"; font-size: 11px; color: #a33a32; }
 
+    /* 「◎」マークのみ表示 */
     .host-badge {
-      font-size: 11px; padding: 2px 6px; background: #263d52; color: #fff; border-radius: 3px;
+      display: inline-block;
+      font-size: 13px;
+      font-weight: bold;
+      color: #263d52;
+      margin-left: 6px;
     }
 
     .empty-msg { text-align: center; color: #756b5f; padding: 40px 0; font-size: 14px; }
@@ -72,10 +84,8 @@
   </header>
 
   <section class="panel">
-    <div class="view-tabs">
-      <button class="tab-btn active" onclick="switchView('all')">全体トーナメント表</button>
-      <button class="tab-btn" onclick="switchView('late')">後半戦（ベスト8以降〜）</button>
-    </div>
+    <!-- 回戦タブコンテナ -->
+    <div class="view-tabs" id="tab-container"></div>
 
     <div id="tournament-tree" class="tournament-grid"></div>
   </section>
@@ -85,11 +95,10 @@
 
 <script>
 const STORAGE_KEY = "owari_hanafuda_tournament_data";
-let tournamentData = { players: [], matches: {}, currentView: "all" };
+let tournamentData = { players: [], matches: {}, selectedRound: "all" };
 
 window.addEventListener("DOMContentLoaded", () => {
   loadAndRender();
-  // 他タブや更新に対応するためLocalStorageを自動監視
   window.addEventListener("storage", loadAndRender);
 });
 
@@ -103,14 +112,38 @@ function loadAndRender() {
   }
 
   tournamentData = JSON.parse(saved);
+  if (!tournamentData.selectedRound) tournamentData.selectedRound = "all";
+  renderTabs();
   renderTree();
 }
 
-function switchView(viewMode) {
-  tournamentData.currentView = viewMode;
-  const tabs = document.querySelectorAll(".tab-btn");
-  tabs[0].classList.toggle("active", viewMode === 'all');
-  tabs[1].classList.toggle("active", viewMode === 'late');
+function getRoundName(r, totalRounds) {
+  const remaining = totalRounds - r;
+  if (remaining === 1) return "決勝戦";
+  if (remaining === 2) return "準決勝";
+  if (remaining === 3) return "準々決勝";
+  return `${r + 1}回戦`;
+}
+
+function renderTabs() {
+  const tabContainer = document.getElementById("tab-container");
+  if (!tournamentData.players || tournamentData.players.length === 0) return;
+
+  const totalRounds = Math.ceil(Math.log2(tournamentData.players.length));
+  let html = `<button class="tab-btn ${tournamentData.selectedRound === 'all' ? 'active' : ''}" onclick="selectRound('all')">全回戦表示</button>`;
+  
+  for (let r = 0; r < totalRounds; r++) {
+    const name = getRoundName(r, totalRounds);
+    const active = tournamentData.selectedRound === r ? 'active' : '';
+    html += `<button class="tab-btn ${active}" onclick="selectRound(${r})">${name}</button>`;
+  }
+  
+  tabContainer.innerHTML = html;
+}
+
+function selectRound(r) {
+  tournamentData.selectedRound = r;
+  renderTabs();
   renderTree();
 }
 
@@ -142,22 +175,14 @@ function renderTree() {
     roundSlots[r] = currentRoundSlots;
   }
 
-  let startRound = 0;
-  if (tournamentData.currentView === 'late' && totalRounds > 2) {
-    startRound = totalRounds - 2;
-  }
+  for (let r = 0; r < totalRounds; r++) {
+    if (tournamentData.selectedRound !== "all" && tournamentData.selectedRound !== r) {
+      continue;
+    }
 
-  for (let r = startRound; r < totalRounds; r++) {
     const roundBox = document.createElement("div");
     roundBox.className = "round-box";
-
-    const remaining = totalRounds - r;
-    let roundName = `${r + 1}回戦`;
-    if (remaining === 1) roundName = "決勝戦";
-    else if (remaining === 2) roundName = "準決勝";
-    else if (remaining === 3) roundName = "準々決勝";
-
-    roundBox.innerHTML = `<div class="round-title">${roundName}</div>`;
+    roundBox.innerHTML = `<div class="round-title">${getRoundName(r, totalRounds)}</div>`;
 
     const slots = roundSlots[r];
     const matchCount = Math.ceil(slots.length / 2);
@@ -177,8 +202,7 @@ function renderTree() {
       const isP1Winner = (matchState.winner === p1 && p1 !== "（未定）" && p1 !== "（なし）");
       html += `
         <div class="player-slot ${isP1Winner ? 'winner' : ''}">
-          <span>${p1}</span>
-          ${matchState.host === p1 ? '<span class="host-badge">◎ 部屋主</span>' : ''}
+          <span>${p1} ${matchState.host === p1 ? '<span class="host-badge">◎</span>' : ''}</span>
         </div>
       `;
 
@@ -186,8 +210,7 @@ function renderTree() {
       const isP2Winner = (matchState.winner === p2 && p2 !== "（未定）" && p2 !== "（なし）");
       html += `
         <div class="player-slot ${isP2Winner ? 'winner' : ''}">
-          <span>${p2}</span>
-          ${matchState.host === p2 ? '<span class="host-badge">◎ 部屋主</span>' : ''}
+          <span>${p2} ${matchState.host === p2 ? '<span class="host-badge">◎</span>' : ''}</span>
         </div>
       `;
 
