@@ -47,13 +47,20 @@
     }
     .tab-btn.active { background: #1c4b37; color: #fffaf0; border-color: #1c4b37; }
 
-    /* 全卓表示用 */
+    /* 全卓表示用（トーナメント木） */
     .tree-scroll-wrapper { overflow-x: auto; padding: 20px 0; -webkit-overflow-scrolling: touch; }
     .tournament-tree-full { display: flex; align-items: flex-start; min-width: max-content; }
-    .round-column-full { display: flex; flex-direction: column; width: 290px; margin-right: 30px; position: relative; }
+    .round-column-full { display: flex; flex-direction: column; width: 290px; margin-right: 40px; position: relative; }
     .round-header { text-align: center; font-size: 15px; color: #1c4b37; border-bottom: 2px solid #1c4b37; padding-bottom: 5px; margin-bottom: 15px; font-weight: bold; }
 
-    /* 回戦別表示用（3列程度で折り返し） */
+    /* コの字型（トーナメント連結線） */
+    .match-group { position: relative; margin-bottom: 30px; }
+    .match-group:not(:last-child)::after {
+      content: ""; position: absolute; right: -21px; top: 25%; height: 50%; width: 20px;
+      border-right: 2px solid #a99b83; border-top: 2px solid #a99b83; border-bottom: 2px solid #a99b83; pointer-events: none;
+    }
+
+    /* 回戦別表示用（3列折り返し） */
     .single-round-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -63,7 +70,7 @@
 
     .match-card {
       background: #fffdf5; border: 1px solid #aaa08f; padding: 10px; position: relative; z-index: 2;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.05); transition: 0.2s; margin-bottom: 15px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.05); transition: 0.2s;
     }
     .match-card.search-match {
       border: 2px solid #a33a32; background: #fff5f3; box-shadow: 0 0 10px rgba(163, 58, 50, 0.3);
@@ -79,8 +86,8 @@
     .player-slot.winner .player-name::after { content: " ★"; font-size: 11px; color: #1c4b37; }
     .player-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    .host-badge { font-size: 11px; font-weight: bold; color: #1c4b37; margin-left: 4px; border: 1px solid #1c4b37; padding: 1px 4px; border-radius: 2px; }
-    .sub-host-badge { font-size: 11px; font-weight: bold; color: #6d6255; margin-left: 4px; border: 1px solid #6d6255; padding: 1px 4px; border-radius: 2px; }
+    .host-badge { font-size: 12px; font-weight: bold; color: #1c4b37; margin-left: 6px; }
+    .sub-host-badge { font-size: 12px; font-weight: bold; color: #6d6255; margin-left: 6px; }
 
     .rank-tag { font-size: 11px; font-weight: bold; padding: 2px 5px; border-radius: 3px; margin-left: 4px; }
     .rank-1 { background: #ffd700; color: #000; }
@@ -216,8 +223,8 @@
       return `
         <div class="player-slot ${isWinner ? 'winner' : ''}">
           <span class="player-name">${p}</span>
-          ${isMain ? '<span class="host-badge">◎ 主</span>' : ''}
-          ${isSub ? '<span class="sub-host-badge">〇 副</span>' : ''}
+          ${isMain ? '<span class="host-badge">◎</span>' : ''}
+          ${isSub ? '<span class="sub-host-badge">〇</span>' : ''}
           ${rank ? `<span class="rank-tag rank-${rank}">${rank}位</span>` : ''}
         </div>
       `;
@@ -283,6 +290,7 @@
           const title = isFinal ? "決勝卓" : `第 ${m + 1} 卓`;
 
           const matchGroup = document.createElement("div");
+          matchGroup.className = "match-group";
           matchGroup.innerHTML = createMatchCardHTML(matchPlayers, matchKey, title, isFinal);
           col.appendChild(matchGroup);
         }
