@@ -77,6 +77,7 @@
     .round-column-full { display: flex; flex-direction: column; justify-content: space-around; width: 220px; margin-right: 30px; position: relative; }
     .round-header { text-align: center; font-size: 15px; color: #263d52; border-bottom: 2px solid #263d52; padding-bottom: 5px; margin-bottom: 15px; font-weight: bold; }
     
+    /* 通常の対戦グループ（コの字のトーナメント線つき） */
     .match-group { position: relative; margin: 15px 0; display: flex; flex-direction: column; justify-content: center; flex: 1; }
     .match-group::after {
       content: ""; position: absolute; right: -30px; top: 25%; height: 50%; width: 30px;
@@ -87,6 +88,17 @@
     }
     .round-column-full:last-child .match-group::after,
     .round-column-full:last-child .match-group::before { display: none; }
+
+    /* 決勝＋３位決定戦の特殊カラム構造 */
+    .final-column-container {
+      display: flex; flex-direction: column; justify-content: center; height: 100%; gap: 20px;
+    }
+    .final-match-wrapper {
+      display: flex; flex-direction: column; justify-content: center; flex: 1;
+    }
+    .third-place-wrapper {
+      margin-top: auto; padding-top: 15px; border-top: 1px dashed #a99b83;
+    }
 
     .single-round-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; padding: 10px 0;
@@ -362,28 +374,44 @@
         col.className = "round-column-full";
         col.innerHTML = `<div class="round-header">${getRoundName(r, totalRounds)}</div>`;
 
-        const slots = roundSlots[r];
-        const matchCount = Math.ceil(slots.length / 2);
+        if (r === totalRounds - 1) {
+          // 決勝戦カラムのレイアウト（中央に決勝戦、下に３位決定戦）
+          const finalContainer = document.createElement("div");
+          finalContainer.className = "final-column-container";
 
-        for (let m = 0; m < matchCount; m++) {
-          const p1 = slots[m * 2] || "（なし）";
-          const p2 = slots[m * 2 + 1] || "（なし）";
-          const matchKey = `${r}-${m}`;
+          const p1 = roundSlots[r][0] || "（なし）";
+          const p2 = roundSlots[r][1] || "（なし）";
+          const matchKey = `${r}-0`;
 
-          const matchGroup = document.createElement("div");
-          matchGroup.className = "match-group";
-          matchGroup.innerHTML = createMatchCardHTML(p1, p2, matchKey, `第 ${m + 1} 試合`, query);
-          col.appendChild(matchGroup);
-        }
+          const finalMatchWrapper = document.createElement("div");
+          finalMatchWrapper.className = "final-match-wrapper";
+          finalMatchWrapper.innerHTML = createMatchCardHTML(p1, p2, matchKey, "決勝戦", query);
+          finalContainer.appendChild(finalMatchWrapper);
 
-        // 決勝戦カラムに3位決定戦を追加
-        if (r === totalRounds - 1 && totalRounds >= 2) {
-          const [p3_1, p3_2] = get3rdPlacePlayers(roundSlots, totalRounds);
-          const thirdMatchGroup = document.createElement("div");
-          thirdMatchGroup.className = "match-group";
-          thirdMatchGroup.style.marginTop = "30px";
-          thirdMatchGroup.innerHTML = createMatchCardHTML(p3_1, p3_2, "3rd-place", "3位決定戦", query);
-          col.appendChild(thirdMatchGroup);
+          if (totalRounds >= 2) {
+            const [p3_1, p3_2] = get3rdPlacePlayers(roundSlots, totalRounds);
+            const thirdWrapper = document.createElement("div");
+            thirdWrapper.className = "third-place-wrapper";
+            thirdWrapper.innerHTML = createMatchCardHTML(p3_1, p3_2, "3rd-place", "３位決定戦", query);
+            finalContainer.appendChild(thirdWrapper);
+          }
+
+          col.appendChild(finalContainer);
+        } else {
+          // 準決勝以前のカラム（コの字線をつける構造）
+          const slots = roundSlots[r];
+          const matchCount = Math.ceil(slots.length / 2);
+
+          for (let m = 0; m < matchCount; m++) {
+            const p1 = slots[m * 2] || "（なし）";
+            const p2 = slots[m * 2 + 1] || "（なし）";
+            const matchKey = `${r}-${m}`;
+
+            const matchGroup = document.createElement("div");
+            matchGroup.className = "match-group";
+            matchGroup.innerHTML = createMatchCardHTML(p1, p2, matchKey, `第 ${m + 1} 試合`, query);
+            col.appendChild(matchGroup);
+          }
         }
 
         treeContainer.appendChild(col);
@@ -413,10 +441,10 @@
         gridContainer.innerHTML += createMatchCardHTML(p1, p2, matchKey, `第 ${m + 1} 試合`, query);
       }
 
-      // 決勝戦タブ選択時に3位決定戦を表示
+      // 決勝戦タブ選択時に３位決定戦を表示
       if (r === totalRounds - 1 && totalRounds >= 2) {
         const [p3_1, p3_2] = get3rdPlacePlayers(roundSlots, totalRounds);
-        gridContainer.innerHTML += createMatchCardHTML(p3_1, p3_2, "3rd-place", "3位決定戦", query);
+        gridContainer.innerHTML += createMatchCardHTML(p3_1, p3_2, "3rd-place", "３位決定戦", query);
       }
 
       wrapper.appendChild(gridContainer);
