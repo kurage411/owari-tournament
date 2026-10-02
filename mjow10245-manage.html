@@ -72,13 +72,20 @@
     }
     .tab-btn.active { background: #1c4b37; color: #fffaf0; border-color: #1c4b37; }
 
-    /* 全卓表示用（横スクロール） */
+    /* 全卓表示用（トーナメント木） */
     .tree-scroll-wrapper { overflow-x: auto; padding: 20px 0; }
     .tournament-tree-full { display: flex; align-items: flex-start; min-width: max-content; }
-    .round-column-full { display: flex; flex-direction: column; width: 290px; margin-right: 30px; position: relative; }
+    .round-column-full { display: flex; flex-direction: column; width: 290px; margin-right: 40px; position: relative; }
     .round-header { text-align: center; font-size: 15px; color: #1c4b37; border-bottom: 2px solid #1c4b37; padding-bottom: 5px; margin-bottom: 15px; font-weight: bold; }
 
-    /* 回戦別表示用（3列程度で折り返し） */
+    /* コの字型（トーナメント連結線） */
+    .match-group { position: relative; margin-bottom: 30px; }
+    .match-group:not(:last-child)::after {
+      content: ""; position: absolute; right: -21px; top: 25%; height: 50%; width: 20px;
+      border-right: 2px solid #a99b83; border-top: 2px solid #a99b83; border-bottom: 2px solid #a99b83; pointer-events: none;
+    }
+
+    /* 回戦別表示用（3列折り返し） */
     .single-round-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -88,7 +95,7 @@
 
     .match-card {
       background: #fffdf5; border: 1px solid #aaa08f; padding: 10px; position: relative; z-index: 2;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.05); transition: 0.2s; margin-bottom: 15px;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.05); transition: 0.2s;
     }
     .match-card.search-match {
       border: 2px solid #a33a32; background: #fff5f3; box-shadow: 0 0 10px rgba(163, 58, 50, 0.3);
@@ -106,13 +113,13 @@
     .player-slot.winner .player-name::after { content: " ★(勝ち抜け)"; font-size: 11px; color: #1c4b37; }
     .player-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    .btn-group { display: flex; gap: 3px; flex-shrink: 0; margin-left: 4px; }
-    .host-btn, .rank-btn {
-      font-size: 10px; padding: 2px 4px; border: 1px solid #aaa08f; background: #fdfaef;
-      cursor: pointer; color: #5e554c; border-radius: 2px;
+    .btn-group { display: flex; gap: 4px; flex-shrink: 0; margin-left: 4px; }
+    .toggle-host-btn, .rank-btn {
+      font-size: 10px; padding: 3px 6px; border: 1px solid #aaa08f; background: #fdfaef;
+      cursor: pointer; color: #5e554c; border-radius: 2px; line-height: 1;
     }
-    .host-btn.main-active { background: #1c4b37; color: #fff; border-color: #1c4b37; }
-    .host-btn.sub-active { background: #6d6255; color: #fff; border-color: #6d6255; }
+    .toggle-host-btn.is-main { background: #1c4b37; color: #fff; border-color: #1c4b37; font-weight: bold; }
+    .toggle-host-btn.is-sub { background: #6d6255; color: #fff; border-color: #6d6255; font-weight: bold; }
 
     .rank-tag { font-size: 11px; font-weight: bold; padding: 2px 5px; border-radius: 3px; margin-left: 4px; }
     .rank-1 { background: #ffd700; color: #000; }
@@ -287,6 +294,16 @@
       const isSub = subHosts.includes(p);
       const rank = ranks[p];
 
+      let hostBtnLabel = "なし";
+      let hostBtnClass = "";
+      if (isMain) {
+        hostBtnLabel = "主部屋主◎";
+        hostBtnClass = "is-main";
+      } else if (isSub) {
+        hostBtnLabel = "副部屋主〇";
+        hostBtnClass = "is-sub";
+      }
+
       return `
         <div class="player-slot ${isWinner ? 'winner' : ''}" data-key="${matchKey}" data-player="${p}">
           <span class="player-name">${p}</span>
@@ -298,11 +315,8 @@
               <button class="rank-btn" data-rank-key="${matchKey}" data-player="${p}" data-rank="3">3位</button>
             ` : ''}
             ${(p !== "（未定）") ? `
-              <button class="host-btn main-btn ${isMain ? 'main-active' : ''}" data-host-key="${matchKey}" data-player="${p}" data-type="main">
-                ◎ 主
-              </button>
-              <button class="host-btn sub-btn ${isSub ? 'sub-active' : ''}" data-host-key="${matchKey}" data-player="${p}" data-type="sub">
-                〇 副
+              <button class="toggle-host-btn ${hostBtnClass}" data-host-key="${matchKey}" data-player="${p}">
+                ${hostBtnLabel}
               </button>
             ` : ''}
           </div>
@@ -370,6 +384,7 @@
           const title = isFinal ? "決勝卓" : `第 ${m + 1} 卓`;
 
           const matchGroup = document.createElement("div");
+          matchGroup.className = "match-group";
           matchGroup.innerHTML = createMatchCardHTML(matchPlayers, matchKey, title, isFinal);
           col.appendChild(matchGroup);
         }
@@ -429,34 +444,36 @@
       });
     });
 
-    // 部屋主切り替え（◎主・〇副 それぞれ独立）
-    wrapper.querySelectorAll(".host-btn").forEach(btn => {
+    // 部屋主切り替え（"なし" ➔ "主部屋主◎" ➔ "副部屋主〇" ➔ "なし"）
+    wrapper.querySelectorAll(".toggle-host-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const key = btn.getAttribute("data-host-key");
         const player = btn.getAttribute("data-player");
-        const type = btn.getAttribute("data-type");
 
         if (!tournamentData.matches[key]) tournamentData.matches[key] = { winners: [], mainHosts: [], subHosts: [], ranks: {} };
         const matchState = tournamentData.matches[key];
 
-        if (type === "main") {
-          let mainHosts = matchState.mainHosts || [];
-          if (mainHosts.includes(player)) {
-            matchState.mainHosts = mainHosts.filter(p => p !== player);
-          } else {
-            mainHosts.push(player);
-            matchState.mainHosts = mainHosts;
-          }
-        } else if (type === "sub") {
-          let subHosts = matchState.subHosts || [];
-          if (subHosts.includes(player)) {
-            matchState.subHosts = subHosts.filter(p => p !== player);
-          } else {
-            subHosts.push(player);
-            matchState.subHosts = subHosts;
-          }
+        let mainHosts = matchState.mainHosts || [];
+        let subHosts = matchState.subHosts || [];
+
+        const isMain = mainHosts.includes(player);
+        const isSub = subHosts.includes(player);
+
+        if (!isMain && !isSub) {
+          // なし ➔ 主部屋主◎
+          mainHosts.push(player);
+        } else if (isMain) {
+          // 主部屋主◎ ➔ 副部屋主〇
+          mainHosts = mainHosts.filter(p => p !== player);
+          subHosts.push(player);
+        } else if (isSub) {
+          // 副部屋主〇 ➔ なし
+          subHosts = subHosts.filter(p => p !== player);
         }
+
+        matchState.mainHosts = mainHosts;
+        matchState.subHosts = subHosts;
         saveData();
       });
     });
