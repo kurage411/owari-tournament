@@ -1,9 +1,324 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <title>尾張藩大会</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>尾張藩主催 花札・麻雀大会</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        "Noto Serif JP",
+        serif;
+
+      color: #2b2926;
+
+      background:
+        linear-gradient(
+          rgba(255, 250, 235, 0.82),
+          rgba(255, 250, 235, 0.82)
+        ),
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 3px,
+          rgba(80, 60, 40, 0.025) 4px
+        );
+
+      background-color: #f3ead5;
+      min-height: 100vh;
+    }
+
+    /* 全体 */
+    .container {
+      width: min(900px, 92%);
+      margin: 0 auto;
+      padding: 50px 0 60px;
+    }
+
+    /* 上部 */
+    .header {
+      text-align: center;
+      margin-bottom: 45px;
+    }
+
+    .header-kamon {
+      font-size: 38px;
+      color: #263d52;
+      margin-bottom: 18px;
+    }
+
+    .header-subtitle {
+      font-size: 14px;
+      letter-spacing: 0.35em;
+      color: #6d6255;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 6vw, 48px);
+      font-weight: normal;
+      letter-spacing: 0.12em;
+      color: #263d52;
+    }
+
+    .header-line {
+      width: 120px;
+      height: 2px;
+      background: #a33a32;
+      margin: 22px auto;
+    }
+
+    .header-catch {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0.18em;
+      color: #5e554c;
+    }
+
+    /* 大会選択 */
+    .section-title {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .section-title span {
+      display: inline-block;
+      padding: 7px 25px;
+      border-top: 1px solid #817563;
+      border-bottom: 1px solid #817563;
+      color: #493f36;
+      letter-spacing: 0.2em;
+    }
+
+    .games {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+    }
+
+    .game-card {
+      position: relative;
+      display: block;
+      padding: 35px 25px;
+      text-decoration: none;
+      text-align: center;
+
+      background: rgba(255, 252, 241, 0.72);
+      border: 1px solid #a99b83;
+
+      color: #2b2926;
+
+      transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-3px);
+      background: #fffaf0;
+      box-shadow: 0 6px 16px rgba(70, 55, 40, 0.12);
+    }
+
+    .game-symbol {
+      font-size: 42px;
+      margin-bottom: 15px;
+      color: #263d52;
+    }
+
+    .game-card h2 {
+      margin: 0 0 10px;
+      font-size: 25px;
+      font-weight: normal;
+      letter-spacing: 0.15em;
+    }
+
+    .game-card p {
+      margin: 0;
+      color: #756b5f;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+    }
+
+    .card-arrow {
+      margin-top: 22px;
+      color: #a33a32;
+      font-size: 13px;
+      letter-spacing: 0.15em;
+    }
+
+    /* 運営 */
+    .admin-area {
+      margin-top: 45px;
+      text-align: center;
+    }
+
+    .admin-link {
+      display: inline-block;
+      padding: 10px 25px;
+
+      color: #5c5147;
+      text-decoration: none;
+
+      border: 1px solid #aaa08f;
+      background: rgba(255, 252, 241, 0.5);
+
+      font-size: 13px;
+      letter-spacing: 0.12em;
+
+      transition: background 0.2s ease;
+    }
+
+    .admin-link:hover {
+      background: #fffaf0;
+    }
+
+    /* 下部 */
+    footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid #b9ad99;
+
+      text-align: center;
+      color: #81766a;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+    }
+
+    /* スマホ */
+    @media (max-width: 600px) {
+      .container {
+        padding-top: 35px;
+      }
+
+      .games {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        margin-bottom: 35px;
+      }
+
+      .header-kamon {
+        font-size: 32px;
+      }
+
+      .game-card {
+        padding: 30px 20px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <h1>尾張藩大会</h1>
+
+  <main class="container">
+
+    <!-- ヘッダー -->
+    <header class="header">
+
+      <div class="header-kamon">紋</div>
+
+      <div class="header-subtitle">
+        尾張藩主催
+      </div>
+
+      <h1>
+        花札・麻雀大会
+      </h1>
+
+      <div class="header-line"></div>
+
+      <p class="header-catch">
+        天下泰平、腕比べ
+      </p>
+
+    </header>
+
+
+    <!-- 大会選択 -->
+    <section>
+
+      <div class="section-title">
+        <span>大会案内</span>
+      </div>
+
+      <div class="games">
+
+        <!-- 花札 -->
+        <a href="hanafuda.html" class="game-card">
+
+          <div class="game-symbol">
+            花
+          </div>
+
+          <h2>
+            花札大会
+          </h2>
+
+          <p>
+            花を読み、札を取り、勝負を競う
+          </p>
+
+          <div class="card-arrow">
+            大会表を見る　→
+          </div>
+
+        </a>
+
+
+        <!-- 麻雀 -->
+        <a href="mahjong.html" class="game-card">
+
+          <div class="game-symbol">
+            牌
+          </div>
+
+          <h2>
+            麻雀大会
+          </h2>
+
+          <p>
+            東風の卓にて、腕を競う
+          </p>
+
+          <div class="card-arrow">
+            大会表を見る　→
+          </div>
+
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- 運営 -->
+    <section class="admin-area">
+
+      <a href="admin.html" class="admin-link">
+        運営者入口
+      </a>
+
+    </section>
+
+
+    <!-- フッター -->
+    <footer>
+      尾張藩主催　花札・麻雀大会
+    </footer>
+
+  </main>
+
 </body>
 </html>
