@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>運営者入口｜尾張藩大会</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        "Noto Serif JP",
+        serif;
+
+      color: #2b2926;
+
+      background-color: #f3ead5;
+
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 3px,
+          rgba(80, 60, 40, 0.025) 4px
+        );
+    }
+
+    .login-box {
+      width: min(420px, 90%);
+      padding: 40px 30px;
+
+      text-align: center;
+
+      background: rgba(255, 252, 241, 0.8);
+      border: 1px solid #a99b83;
+
+      box-shadow:
+        0 8px 25px rgba(70, 55, 40, 0.1);
+    }
+
+    .title-small {
+      font-size: 13px;
+      letter-spacing: 0.25em;
+      color: #6d6255;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0;
+
+      font-size: 28px;
+      font-weight: normal;
+      letter-spacing: 0.15em;
+
+      color: #263d52;
+    }
+
+    .line {
+      width: 80px;
+      height: 2px;
+
+      background: #a33a32;
+
+      margin: 20px auto 30px;
+    }
+
+    label {
+      display: block;
+
+      margin-bottom: 8px;
+
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      color: #5e554c;
+    }
+
+    input {
+      width: 100%;
+
+      padding: 13px;
+
+      border: 1px solid #aaa08f;
+      background: #fffdf5;
+
+      font-family: inherit;
+      font-size: 16px;
+
+      text-align: center;
+
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #263d52;
+    }
+
+    button {
+      width: 100%;
+
+      margin-top: 20px;
+      padding: 13px;
+
+      border: none;
+
+      background: #263d52;
+      color: #fffaf0;
+
+      font-family: inherit;
+      font-size: 15px;
+      letter-spacing: 0.15em;
+
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #314e67;
+    }
+
+    .error {
+      display: none;
+
+      margin-top: 15px;
+
+      color: #a33a32;
+      font-size: 13px;
+    }
+
+    .back {
+      display: block;
+
+      margin-top: 25px;
+
+      color: #756b5f;
+      text-decoration: none;
+
+      font-size: 12px;
+      letter-spacing: 0.1em;
+    }
+
+    .back:hover {
+      color: #263d52;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="login-box">
+
+    <div class="title-small">
+      尾張藩主催
+    </div>
+
+    <h1>運営者入口</h1>
+
+    <div class="line"></div>
+
+    <label for="password">
+      運営用パスワード
+    </label>
+
+    <input
+      type="password"
+      id="password"
+      placeholder="パスワードを入力"
+      autocomplete="off"
+    >
+
+    <button onclick="login()">
+      入　場
+    </button>
+
+    <div id="error" class="error">
+      パスワードが違います。
+    </div>
+
+    <a href="index.html" class="back">
+      ← 大会トップへ戻る
+    </a>
+
+  </main>
+
+
+  <script>
+    function login() {
+
+      const password =
+        document.getElementById("password").value;
+
+      const correctPassword =
+        "owari-10256";
+
+      if (password === correctPassword) {
+
+        window.location.href = "admin-panel.html";
+
+      } else {
+
+        document.getElementById("error").style.display = "block";
+
+      }
+    }
+
+    document
+      .getElementById("password")
+      .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+          login();
+        }
+
+      });
+  </script>
+
+</body>
+</html>
