@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>花札大会 トーナメント表｜尾張藩大会</title>
+  
+  <!-- html2canvas ライブラリ追加 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <style>
     * { box-sizing: border-box; }
     body {
@@ -31,12 +35,19 @@
 
     .search-box {
       margin-bottom: 20px; display: flex; align-items: center; gap: 10px; background: #fffdf5;
-      padding: 10px 15px; border: 1px solid #a99b83;
+      padding: 10px 15px; border: 1px solid #a99b83; flex-wrap: wrap;
     }
     .search-box label { margin: 0; white-space: nowrap; font-weight: bold; color: #263d52; }
     .search-box input {
-      flex: 1; padding: 8px 12px; border: 1px solid #aaa08f; font-family: inherit; font-size: 14px; outline: none;
+      flex: 1; padding: 8px 12px; border: 1px solid #aaa08f; font-family: inherit; font-size: 14px; outline: none; min-width: 180px;
     }
+
+    /* 画像保存ボタン用スタイル */
+    .export-btn {
+      background: #263d52; color: #fffaf0; border: 1px solid #263d52;
+      padding: 8px 14px; font-family: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; transition: 0.2s;
+    }
+    .export-btn:hover { background: #3a5670; }
 
     .view-tabs {
       display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #a99b83; padding-bottom: 10px;
@@ -124,6 +135,7 @@
     <div class="search-box">
       <label for="search-input">🔍 自分の対戦を探す:</label>
       <input type="text" id="search-input" placeholder="プレイヤー名を入力...">
+      <button id="btn-export-image" class="export-btn">📸 画像として保存</button>
     </div>
 
     <div class="view-tabs" id="tab-container"></div>
@@ -174,6 +186,26 @@
   document.getElementById("search-input").addEventListener("input", (e) => {
     tournamentData.searchQuery = e.target.value.trim().toLowerCase();
     renderTree();
+  });
+
+  /* トーナメント表の画像保存処理 */
+  document.getElementById("btn-export-image").addEventListener("click", () => {
+    const treeArea = document.getElementById("tree-wrapper");
+    if (!treeArea || !treeArea.innerText.trim()) {
+      return alert("保存するトーナメント表が表示されていません。");
+    }
+
+    const activeTab = document.querySelector(".tab-btn.active")?.textContent.trim() || "トーナメント表";
+
+    html2canvas(treeArea, {
+      backgroundColor: "#f3ead5",
+      scale: 2
+    }).then(canvas => {
+      const link = document.createElement("a");
+      link.download = `花札大会_${activeTab}_${new Date().toISOString().slice(0, 10)}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
   });
 
   function getRoundName(r, totalRounds) {
